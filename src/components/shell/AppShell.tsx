@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { SiteLogo } from "@/components/ui";
 import { ideas } from "@/lib/fixtures";
-import { ANIMALS, pickRandomAnimal, usePreferences } from "./preferences";
+import { usePreferences } from "./preferences";
+import { AsciiOcean } from "./ascii-ocean/AsciiOcean";
 import { SettingsDrawer } from "./SettingsDrawer";
 
 /** body mode class per route (reference CSS keys off these). */
@@ -48,16 +49,14 @@ function isActive(pathname: string, href: string) {
 }
 
 /**
- * AppShell: rail (left nav), ambient scene (video), header (wordmark + actions), route content, footer
- * (ambient controls), settings drawer and toast. Route pages render INSIDE <main>, after <header>.
+ * AppShell: rail (left nav), subtle ASCII background (random scene per load), header (wordmark + actions),
+ * route content, footer, settings drawer and toast. Route pages render INSIDE <main>, after <header>.
  * Use absolute-positioned regions like the reference: `.workspace` (home), `.conversation` (chat),
  * `.decision-lab` (lab) or `.page-region` (dashboard / anything else).
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() || "/";
-  const { prefs, current, setPrefs, setCurrent, toggleDark, notify, toast, openDrawer } = usePreferences();
-  const video = useRef<HTMLVideoElement>(null);
-  const animal = ANIMALS.find((a) => a.id === current) ?? ANIMALS[0]!;
+  const { prefs, toggleDark, toast, openDrawer } = usePreferences();
 
   useEffect(() => {
     const body = document.body;
@@ -65,13 +64,6 @@ export function AppShell({ children }: { children: ReactNode }) {
     const mode = modeFor(pathname);
     if (mode) body.classList.add(mode);
   }, [pathname]);
-
-  useEffect(() => {
-    const v = video.current;
-    if (!v) return;
-    if (prefs.paused) v.pause();
-    else v.play().catch(() => {});
-  }, [prefs.paused, current]);
 
   return (
     <>
@@ -103,18 +95,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <main>
         <div className="scene">
-          <video
-            ref={video}
-            key={animal.id}
-            autoPlay={!prefs.paused}
-            muted
-            loop
-            playsInline
-            poster={`/assets/${animal.id}.jpg`}
-            src={`/assets/${animal.id}.mp4`}
-            aria-label={`Video en blanco y negro: ${animal.name} en ASCII`}
-            onError={() => notify("No se pudo reproducir el video. Se muestra su imagen de respaldo.")}
-          />
+          <AsciiOcean />
           <div className="scene-veil" />
         </div>
 
@@ -137,54 +118,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         {children}
 
-        <footer>
-          <div className="environment">
-            <span className="environment-icon" aria-hidden="true">≈</span>
-            <div>
-              <span className="eyebrow">TU AMBIENTE</span>
-              <button onClick={openDrawer}>
-                {animal.name} <span>↗</span>
-              </button>
-            </div>
-            <span className="small-tag">VIDEO · B/N</span>
-          </div>
-          <div className="footer-center">Un poco de naturaleza. Un espacio para ti.</div>
-          <div className="ambient-controls">
-            <button
-              onClick={() => setPrefs({ paused: !prefs.paused })}
-              aria-label={prefs.paused ? "Reproducir fondo" : "Pausar fondo"}
-              title={prefs.paused ? "Reproducir fondo" : "Pausar fondo"}
-            >
-              {prefs.paused ? "▷" : "Ⅱ"}
-            </button>
-            <button
-              onClick={() => {
-                const next = pickRandomAnimal(current);
-                setCurrent(next);
-                if (prefs.mode === "fixed") setPrefs({ animal: next });
-                notify(`Ahora: ${ANIMALS.find((a) => a.id === next)!.name}`);
-              }}
-              title="Cambiar ambiente"
-              aria-label="Cambiar ambiente"
-            >
-              ⤨
-            </button>
-            <button
-              className="random-status"
-              onClick={() => {
-                const mode = prefs.mode === "random" ? "fixed" : "random";
-                setPrefs({ mode, animal: current });
-                notify(mode === "random" ? "Un ambiente diferente en cada visita" : "Este ambiente queda fijado");
-              }}
-            >
-              {prefs.mode === "random" ? (
-                <>Aleatorio <span className="live-dot" /></>
-              ) : (
-                <>Individual <span>◇</span></>
-              )}
-            </button>
-          </div>
-        </footer>
+        <footer aria-hidden="true" />
       </main>
 
       <SettingsDrawer />

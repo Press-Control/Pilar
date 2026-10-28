@@ -3,7 +3,7 @@
 Antes de subir: `curl -s localhost:3100/api/health` y un calentamiento (un mensaje, un "Escuchar", una fuente). Una sola pestaña de chat abierta y nada más pegándole al servidor.
 
 ## 1. Inicio (`/`) · 20 s
-"Esto es El Pilar: un espacio para pensar." Muestra el ambiente y el modo oscuro en Personalizar.
+"Esto es El Pilar: un espacio para pensar." Muestra el modo oscuro en Personalizar (el fondo ASCII cambia en cada carga).
 
 ## 2. Conversación en vivo con Pilar · 90 s
 Escribe exactamente, uno por uno:
