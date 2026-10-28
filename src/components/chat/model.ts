@@ -21,6 +21,8 @@ export type UIMessage = {
   engine?: string | null;
   /** For events: how to send it as context. */
   eventKind?: "decision" | "source" | "decision-removed";
+  /** Set when the turn happened over a phone call ("Llamarme"). */
+  via?: "call";
 };
 
 export type UIDecision = { id: string; code: string; text: string; reason?: string; status: "active" | "proposed"; source: "chat" | "decision-lab" };

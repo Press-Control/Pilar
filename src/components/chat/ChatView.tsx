@@ -11,6 +11,7 @@ import { DEMO_SCRIPT, HOME_PROMPTS, JOURNEY_STAGES, ideas as fixtureIdeas } from
 import { InsightPanel } from "./InsightPanel";
 import { ListenButton } from "./ListenButton";
 import { VoicePanel } from "./VoicePanel";
+import { CallBar, CallButton, useCall, type CallTurn } from "./CallControl";
 import {
   STORAGE_PREFIX,
   applyUpdates,
@@ -193,6 +194,36 @@ export function ChatView({ ideaId, firstPrompt, initialMode = "texto" }: { ideaI
       window.history.replaceState(null, "", `${url.pathname}${url.search}`);
     } catch {}
   }, []);
+
+  /* ------------------------------------------------------------------ phone call ("Llamarme") */
+  const onCallTurn = useCallback(
+    (t: CallTurn, eng: string | null) => {
+      commitMessages((prev) => [
+        ...prev.map((m) => (m.failed ? { ...m, failed: undefined } : m)),
+        { id: uid(t.role === "user" ? "u" : "a"), role: t.role, content: t.content, status: "done", via: "call", engine: t.role === "assistant" ? eng : undefined },
+      ]);
+      // Live mirror: always follow the newest turn.
+      requestAnimationFrame(() => {
+        const el = listRef.current;
+        if (el) el.scrollTop = el.scrollHeight;
+      });
+      if (t.role !== "assistant") return;
+      if (eng) setEngine(eng);
+      const base = stateRef.current;
+      if (t.updates) {
+        const { state: merged, touched: keys } = applyUpdates(base, t.updates);
+        const progressed = fallbackProgress(merged, messagesRef.current);
+        const stage = t.updates.stage && stageIndex(merged.stage) >= stageIndex(base.stage) ? merged.stage : base.stage;
+        commitState(t.updates.stage ? { ...progressed, stage } : progressed);
+        flash(progressed.stage !== base.stage ? [...keys, "stage", "map"] : keys);
+      } else if (messagesRef.current.some((m) => m.role === "user")) {
+        commitState(fallbackProgress(base, messagesRef.current));
+      }
+    },
+    [commitMessages, commitState, flash],
+  );
+  const getCallContext = useCallback(() => ({ messages: toWire(messagesRef.current), ideaId }), [ideaId]);
+  const call = useCall({ getContext: getCallContext, onTurn: onCallTurn });
 
   /* ------------------------------------------------------------------ boot: ?q=, storage or fixture */
   useEffect(() => {
@@ -409,6 +440,7 @@ export function ChatView({ ideaId, firstPrompt, initialMode = "texto" }: { ideaI
                   Decision Lab ↗
                 </Link>
               ) : null}
+              <CallButton call={call} />
               <span className="stage-type" id="stageType">{stage.type}</span>
             </div>
           </div>
@@ -417,7 +449,7 @@ export function ChatView({ ideaId, firstPrompt, initialMode = "texto" }: { ideaI
             <section className="chat-column" aria-label="Conversación">
               <div className="block-heading">
                 <span>↳ &nbsp; {mode === "voz" ? "Conversación en voz" : "Tu conversación"}</span>
-                <span className="chat-status">{busy ? "La idea toma forma…" : "A tu ritmo"}</span>
+                <span className="chat-status">{call.active ? "Conversando por teléfono" : busy ? "La idea toma forma…" : "A tu ritmo"}</span>
               </div>
 
               {mode === "voz" ? (
@@ -432,6 +464,7 @@ export function ChatView({ ideaId, firstPrompt, initialMode = "texto" }: { ideaI
                     return (
                       <article key={m.id} className={`message message-user arriving${m.failed ? " is-failed" : ""}`}>
                         {m.content}
+                        {m.via === "call" ? <span className="message-via">☏ POR TELÉFONO</span> : null}
                         {m.failed ? (
                           <span className="message-failed" role="alert">
                             {m.failed}
@@ -458,6 +491,7 @@ export function ChatView({ ideaId, firstPrompt, initialMode = "texto" }: { ideaI
                       <div className="guide-copy">
                         <div className="message-label">
                           EL PILAR <span>{isLive(m.engine ?? (streaming ? engine : null)) ? "EN VIVO" : "GUÍA LOCAL"}</span>
+                          {m.via === "call" ? <span>☏ POR TELÉFONO</span> : null}
                         </div>
                         {streaming && !m.content ? (
                           <div className="guide-thinking-wrap" role="status">
@@ -492,6 +526,7 @@ export function ChatView({ ideaId, firstPrompt, initialMode = "texto" }: { ideaI
                 })}
               </div>
 
+              <CallBar call={call} />
               <div className={`chat-dock-wrap${busy ? " is-busy" : ""}`}>
                 <PromptComposer
                   ref={inputRef}
@@ -499,10 +534,10 @@ export function ChatView({ ideaId, firstPrompt, initialMode = "texto" }: { ideaI
                   value={draft}
                   onChange={setDraft}
                   onSubmit={send}
-                  busy={busy}
+                  busy={busy || call.active}
                   label="Escribe tu mensaje"
                   placeholder={users === 0 ? "Cuéntame tu idea, aunque sea a medias…" : "Sigamos dándole forma…"}
-                  hint={busy ? "LA IDEA TOMA FORMA…" : "UNA PREGUNTA A LA VEZ"}
+                  hint={call.active ? "EN LLAMADA · HABLA POR TELÉFONO" : busy ? "LA IDEA TOMA FORMA…" : "UNA PREGUNTA A LA VEZ"}
                   autoFocus={!firstPrompt}
                 />
                 {busy ? (

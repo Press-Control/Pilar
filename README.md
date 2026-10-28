@@ -113,6 +113,28 @@ Motor activo, modelo, disponibilidad de cada key (solo booleanos) y latencia del
 curl -s localhost:3100/api/health
 ```
 
+## Llamada telefónica («Llamarme»)
+
+En `/chat`, el botón **☏ Llamarme** (junto a la etapa) hace que Twilio llame a tu teléfono. Pilar conversa contigo por voz con el mismo prompt y motor que el chat (estilo voz: ≤40 palabras, sin Markdown) y la página se actualiza en vivo: subtítulos de la llamada, mensajes en el chat y el panel lateral (mapa, decisiones, preguntas, hipótesis, siguiente paso) con el trailer `<<<UPDATES>>>`. Al colgar, todo queda en la conversación (localStorage).
+
+Flujo: `POST /api/call/start` → Twilio REST *create call* → Twilio pide `POST /api/call/twiml` (saludo + `<Gather input="speech" language="es-MX">`) → cada frase llega a `POST /api/call/turn` (LLM ≤9 s; si tarda más, dice «Dame un segundo» y `<Redirect>` a `?wait=1`) → la respuesta se sintetiza con ElevenLabs `eleven_flash_v2_5` y se sirve como mp3 desde memoria en `GET /api/call/audio?id=…` (`<Play>`; si la voz falla, `<Say language="es-MX">`). Silencio: un recordatorio y luego despedida y `<Hangup/>`. `POST /api/call/status` (status callback) marca la llamada como terminada. La página consulta `GET /api/call/state?session=…&since=N` cada segundo. Sesiones y audios viven en memoria del proceso (se pierden al reiniciar). Los webhooks validan `X-Twilio-Signature`; además el id de sesión no es adivinable.
+
+Para activarlo en la demo:
+
+1. En `.env.local` agrega `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM` (tu número de Twilio, formato `+1…`) y opcionalmente `TWILIO_DEFAULT_TO` (tu celular `+52…`, prellena el campo). Con cuenta de prueba, el número destino debe estar verificado en Twilio.
+2. Expón el servidor con un túnel (tú decides cuál; la app no lo abre por ti):
+   ```sh
+   pnpm exec next dev -p 3103            # o el puerto que uses
+   # opción A
+   brew install cloudflared && cloudflared tunnel --url http://localhost:3103
+   # opción B
+   ngrok http 3103                       # URL en http://localhost:4040/api/tunnels
+   ```
+3. Pon la URL https del túnel en `.env.local` como `PUBLIC_BASE_URL=https://xxxx.trycloudflare.com` (sin `/` final) y **reinicia** el servidor (las variables se leen al arrancar). Si cambia la URL del túnel, actualízala y reinicia.
+4. Revisa `GET /api/call/health` (solo booleanos). Si falta algo, el botón explica qué variable falta en lugar de fallar.
+
+Simulación local sin llamar (solo en desarrollo): `POST /api/call/start {"dryRun":true}` crea una sesión; abre `/chat?callSession=<id>` y envía webhooks firmados a `/api/call/twiml` y `/api/call/turn` (form `SpeechResult=…`). Con `TWILIO_SKIP_SIGNATURE=1` se omite la validación de firma.
+
 ## Rutas
 
 | Ruta | Vista | Parámetros |
