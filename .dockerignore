@@ -1,0 +1,15 @@
+node_modules
+.next
+out
+.git
+.env*
+!.env.example
+*.log
+*.tsbuildinfo
+.DS_Store
+docs
+*.md
+Dockerfile
+.dockerignore
+railway.json
+scripts
