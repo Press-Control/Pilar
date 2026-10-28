@@ -14,8 +14,9 @@ import type { UIMessage } from "./model";
 type Phase = "off" | "starting" | "listening" | "hearing" | "transcribing" | "thinking" | "speaking" | "paused" | "denied";
 
 const TICK_MS = 50;
-const SPEECH_START_MS = 150; // sustained voice before we consider the person is talking
-const SILENCE_END_MS = 1000; // silence that ends the turn
+const SPEECH_START_MS = 250; // sustained voice before we consider the person is talking
+const MIN_VOICED_MS = 600; // less voiced audio than this is a noise blip, not a turn
+const SILENCE_END_MS = 1300; // silence that ends the turn
 const MAX_TURN_MS = 30_000;
 const IDLE_RESET_MS = 20_000; // nothing heard: restart the recorder so the blob stays small
 const MIN_CHUNK = 20; // chars before a sentence boundary is worth its own TTS call
@@ -82,7 +83,7 @@ export function VoicePanel({
   const analyserRef = useRef<AnalyserNode | null>(null);
   const recRef = useRef<MediaRecorder | null>(null);
   const timerRef = useRef<number | null>(null);
-  const vad = useRef({ speech: 0, silence: 0, heard: false, startedAt: 0, floor: 0.004 });
+  const vad = useRef({ speech: 0, silence: 0, voiced: 0, heard: false, startedAt: 0, floor: 0.004 });
   const turnRef = useRef<Turn | null>(null);
   const queueRef = useRef<Item[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -132,7 +133,7 @@ export function VoicePanel({
     };
     rec.start(250);
     recRef.current = rec;
-    vad.current = { ...vad.current, speech: 0, silence: 0, heard: false, startedAt: performance.now() };
+    vad.current = { ...vad.current, speech: 0, silence: 0, voiced: 0, heard: false, startedAt: performance.now() };
     setPhase("listening");
   }, [setPhase, stopRecorder]);
 
@@ -190,9 +191,10 @@ export function VoicePanel({
     orbRef.current?.style.setProperty("--level", listening ? Math.min(1, rms * 12).toFixed(3) : "0");
     if (!listening) return;
     const v = vad.current;
-    const thr = Math.max(0.012, v.floor * 3);
+    const thr = Math.max(0.02, v.floor * 3.5);
     if (rms > thr) {
       v.speech += TICK_MS;
+      v.voiced += TICK_MS;
       v.silence = 0;
       if (!v.heard && v.speech >= SPEECH_START_MS) {
         v.heard = true;
@@ -205,7 +207,11 @@ export function VoicePanel({
       } else v.silence += TICK_MS;
     }
     const age = performance.now() - v.startedAt;
-    if (v.heard && (v.silence >= SILENCE_END_MS || age > MAX_TURN_MS)) void endTurn();
+    if (v.heard && v.silence >= SILENCE_END_MS && v.voiced < MIN_VOICED_MS) {
+      // A short noise burst crossed the threshold: drop it and keep listening instead of sending empty audio.
+      v.floor = Math.max(v.floor, thr / 3.5);
+      startListening();
+    } else if (v.heard && (v.silence >= SILENCE_END_MS || age > MAX_TURN_MS)) void endTurn();
     else if (!v.heard && age > IDLE_RESET_MS) startListening();
   }, [endTurn, setPhase, startListening]);
 
