@@ -89,7 +89,12 @@ export function ideaContext(ideaId?: string): string {
   return lines.join("\n\n");
 }
 
-export function buildSystemPrompt(ideaId?: string): string {
+/** Appended only on voice turns (/chat?modo=voz): the reply is read aloud by TTS. Text mode is unchanged. */
+export const VOICE_ADDENDUM = `## Modo voz (este turno)
+La persona te está hablando en voz alta y tu respuesta se leerá con voz sintética. Responde en español hablado y natural, como en una conversación: máximo 40 palabras y 3 frases, sin negritas, sin asteriscos, sin listas, sin símbolos ni abreviaturas. Termina con una sola pregunta corta. La transcripción puede tener errores: si algo no se entiende, pregunta con naturalidad. El canal estructurado ${UPDATES_MARKER} sigue siendo obligatorio igual que siempre.`;
+
+export function buildSystemPrompt(ideaId?: string, mode?: "text" | "voice"): string {
   const ctx = ideaContext(ideaId);
-  return ctx ? `${GUIDE_SYSTEM_PROMPT}\n\n${ctx}` : GUIDE_SYSTEM_PROMPT;
+  const base = ctx ? `${GUIDE_SYSTEM_PROMPT}\n\n${ctx}` : GUIDE_SYSTEM_PROMPT;
+  return mode === "voice" ? `${base}\n\n${VOICE_ADDENDUM}` : base;
 }

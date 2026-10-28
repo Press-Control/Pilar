@@ -72,20 +72,26 @@ function sanitize(messages: ChatMessage[]): ChatMessage[] {
     .slice(-30);
 }
 
-export function streamEngine(provider: Provider, rawMessages: ChatMessage[], ideaId: string | undefined, signal: AbortSignal): AsyncGenerator<string> {
+export function streamEngine(
+  provider: Provider,
+  rawMessages: ChatMessage[],
+  ideaId: string | undefined,
+  signal: AbortSignal,
+  mode?: "text" | "voice",
+): AsyncGenerator<string> {
   const messages = sanitize(rawMessages);
   while (messages.length && messages[0]!.role !== "user") messages.shift();
   if (!messages.length) throw new EngineError("Escribe un mensaje para empezar.", 400);
   if (provider === "mock") return mockStream(messages, ideaId, signal);
-  if (provider === "anthropic") return anthropicStream(messages, ideaId, signal);
-  return claudeCliStream(messages, ideaId, signal);
+  if (provider === "anthropic") return anthropicStream(messages, ideaId, signal, mode);
+  return claudeCliStream(messages, ideaId, signal, mode);
 }
 
 // ---------------------------------------------------------------------------------------------- anthropic
 
 let client: Anthropic | undefined;
 
-async function* anthropicStream(messages: ChatMessage[], ideaId: string | undefined, signal: AbortSignal): AsyncGenerator<string> {
+async function* anthropicStream(messages: ChatMessage[], ideaId: string | undefined, signal: AbortSignal, mode?: "text" | "voice"): AsyncGenerator<string> {
   client ??= new Anthropic({ maxRetries: 1 });
   const stream = client.beta.messages.stream(
     {
@@ -94,7 +100,7 @@ async function* anthropicStream(messages: ChatMessage[], ideaId: string | undefi
       betas: ["server-side-fallback-2026-07-01"],
       fallbacks: "default",
       output_config: { effort: EFFORT },
-      system: [{ type: "text", text: buildSystemPrompt(ideaId), cache_control: { type: "ephemeral" } }],
+      system: [{ type: "text", text: buildSystemPrompt(ideaId, mode), cache_control: { type: "ephemeral" } }],
       messages: messages.map((m) => ({ role: m.role, content: m.content })),
     },
     { signal },
@@ -125,7 +131,7 @@ function renderTranscript(messages: ChatMessage[]): string {
   return `Conversación hasta ahora:\n\n${lines.join("\n\n")}\n\nNuevo mensaje de la persona (responde solo a este, como el interlocutor, siguiendo tus instrucciones y con el canal estructurado al final):\n\n${last.content}`;
 }
 
-async function* claudeCliStream(messages: ChatMessage[], ideaId: string | undefined, signal: AbortSignal): AsyncGenerator<string> {
+async function* claudeCliStream(messages: ChatMessage[], ideaId: string | undefined, signal: AbortSignal, mode?: "text" | "voice"): AsyncGenerator<string> {
   const bin = findClaudeBin();
   if (!bin) throw new EngineError("No encontramos Claude Code en esta máquina.");
   const args = [
@@ -135,7 +141,7 @@ async function* claudeCliStream(messages: ChatMessage[], ideaId: string | undefi
     "--include-partial-messages",
     "--model", MODEL,
     "--effort", EFFORT,
-    "--system-prompt", buildSystemPrompt(ideaId),
+    "--system-prompt", buildSystemPrompt(ideaId, mode),
     "--tools", "",
     "--strict-mcp-config",
     "--setting-sources", "",

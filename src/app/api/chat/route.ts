@@ -55,6 +55,7 @@ export async function POST(req: Request) {
   }
   if (!Array.isArray(body?.messages) || body.messages.length === 0) return errorJson("Escribe un mensaje para empezar.", 400);
   const ideaId = typeof body.ideaId === "string" ? body.ideaId : undefined;
+  const mode = body.mode === "voice" ? "voice" : undefined; // voice turns get a shorter, spoken-style reply
 
   // Dev-only switch to compare engines live (curl -H "X-Pilar-Provider: claude-cli|anthropic|mock").
   const override = process.env.NODE_ENV !== "production" ? req.headers.get("x-pilar-provider") : null;
@@ -87,7 +88,7 @@ export async function POST(req: Request) {
     req.signal.addEventListener("abort", onAbort, { once: true });
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      iterator = streamEngine(provider, body.messages, ideaId, ctl.signal);
+      iterator = streamEngine(provider, body.messages, ideaId, ctl.signal, mode);
       const timeout = new Promise<never>((_, reject) => {
         timer = setTimeout(() => reject(new EngineError("El motor tardó demasiado en empezar a responder.", 504)), FIRST_TOKEN_MS[provider]);
       });

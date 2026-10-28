@@ -45,6 +45,8 @@ export type ChatMessage = { role: ChatRole; content: string };
 export type ChatRequest = {
   messages: ChatMessage[];
   ideaId?: string;
+  /** "voice" (from /chat?modo=voz): the server asks for a shorter, spoken-style reply. Omitted = text. */
+  mode?: "text" | "voice";
 };
 
 /** Structured side-channel appended after the text. All fields optional. */

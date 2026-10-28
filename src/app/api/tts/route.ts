@@ -30,9 +30,11 @@ const err = (error: string, status: number) => Response.json({ error }, { status
 
 export async function POST(req: Request) {
   let text = "";
+  let fast = false;
   try {
-    const body = (await req.json()) as { text?: unknown };
+    const body = (await req.json()) as { text?: unknown; fast?: unknown };
     text = typeof body?.text === "string" ? speakable(body.text) : "";
+    fast = body?.fast === true; // voice mode: short sentences, smaller mp3 for lower latency
   } catch {
     return err("La solicitud no es válida.", 400);
   }
@@ -41,7 +43,7 @@ export async function POST(req: Request) {
   const { apiKey, voiceId, language } = elevenLabsSettings();
   if (!apiKey) return err("La voz no está configurada en este equipo.", 503);
 
-  const url = `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voiceId)}/stream?output_format=mp3_44100_128`;
+  const url = `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voiceId)}/stream?output_format=${fast ? "mp3_22050_32" : "mp3_44100_128"}`;
   let res: Response;
   try {
     res = await fetch(url, {
