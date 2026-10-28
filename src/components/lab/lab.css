@@ -1,0 +1,21 @@
+/* Decision Lab (lab agent): small additions on top of src/styles/decision-lab.css (verbatim reference). */
+.dl-dot{color:#999}
+.dl-graph path.dl-path-selected{stroke:var(--ink);stroke-width:1.4}
+.dl-node{transition:background var(--motion,250ms),border-color var(--motion,250ms)}
+.dl-editor-actions>div{flex-wrap:wrap}
+.dl-inspector a.dl-button{color:var(--ink)}
+.dl-history-actions{display:flex;gap:8px;flex-shrink:0}
+.dl-history-empty{padding:0 16px 16px;font-size:12px;color:var(--dl-muted);margin:0}
+.dl-status{min-height:16px}
+.dl-status-link{text-decoration:underline;text-underline-offset:3px;color:var(--ink)}
+.dl-dialog .eyebrow{margin:0}
+.dl-dialog strong{color:var(--ink)}
+.dl-change p{margin:8px 0 0}
+.dark .dl-option{background:var(--surface)}
+.dark .dl-node.option-node span,.dark .dl-node small{color:#9a9a96}
+.dark .dl-dialog::backdrop{background:#0009}
+@media(max-width:700px){
+  .dl-history-item{flex-direction:column;align-items:flex-start}
+  .dl-inspector{scroll-margin-top:12px}
+  .dl-inspector-actions{grid-template-columns:1fr}
+}

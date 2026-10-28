@@ -1,0 +1,169 @@
+/* Chat agent: cuaderno / conversation extras on top of the reference .conversation styles. */
+
+/* insight column holds more cards than the reference: keep each card at its natural height and scroll */
+.insight-column > .insight-card { flex-shrink: 0; }
+@media (min-width: 641px) {
+  /* reference uses a 3-row grid (map 1fr); with more cards we switch to a scrolling stack */
+  .insight-column { display: flex; flex-direction: column; }
+  .insight-column .map-card { flex: 0 0 auto; height: clamp(240px, 36vh, 330px); }
+  .insight-column .idea-map { flex: 1; min-height: 0; }
+}
+.insight-card { transition: background 900ms var(--ease-out); }
+.insight-card.is-updated { animation: chat-card-flash 1500ms var(--ease-out); }
+@keyframes chat-card-flash {
+  0% { background: var(--soft-strong); }
+  100% { background: transparent; }
+}
+
+.stage-actions { display: flex; gap: 6px; align-items: center; }
+.stage-link { color: var(--ink); text-decoration: none; }
+.stage-link:hover { border-color: var(--focus); }
+
+.session-badge.is-busy .live-dot { animation: chat-pulse 1100ms ease-in-out infinite; }
+@keyframes chat-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+
+/* idea map node kinds (monochrome: shape + line style, never color) */
+.map-node--hypothesis circle { fill: var(--paper); stroke: #777; stroke-width: 1; }
+.map-node--proposed circle { fill: var(--paper); stroke: #999; stroke-width: 1; stroke-dasharray: 2 2; }
+.map-node--proposed text { fill: #aaa; font-style: italic; }
+.map-node--decision text { fill: var(--ink); }
+.map-line--proposed { stroke-dasharray: 3 4 !important; stroke-dashoffset: 0 !important; }
+.map-line--proposed:not(.connected) { opacity: 0; }
+.map-line--proposed.connected { opacity: .8; transition: opacity 900ms; }
+.dark .map-node--hypothesis circle, .dark .map-node--proposed circle { fill: #1b1b1b; stroke: #999; }
+
+/* streaming text cursor */
+.message-guide p.is-streaming::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 12px;
+  margin-left: 3px;
+  vertical-align: -1px;
+  background: var(--ink);
+  opacity: .55;
+  animation: chat-pulse 900ms steps(2) infinite;
+}
+
+.guide-thinking-wrap { display: flex; align-items: center; gap: 10px; }
+.guide-thinking-label { font-size: 9px; color: var(--faint); letter-spacing: .2px; }
+
+.message-actions { display: flex; gap: 8px; margin-top: 6px; }
+.message-action {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 9px; color: var(--muted);
+  padding: 4px 8px; border: 1px solid transparent; border-radius: 6px;
+}
+.message-action:hover { border-color: var(--line); opacity: 1; }
+.message-action[aria-pressed="true"] { border-color: var(--line); color: var(--ink); }
+.message-action span { font-size: 10px; }
+
+.message-failed {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 10px;
+  margin-top: 8px; font-size: 9px; color: var(--muted); white-space: normal;
+}
+.message-failed button {
+  font-size: 9px; color: var(--ink);
+  border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; background: var(--surface);
+}
+.message-user.is-failed { border-style: dashed; }
+.message-user .message-failed { justify-content: flex-end; }
+
+/* project event (decision incorporated, source added): structured, not a chat turn */
+.message-event {
+  align-self: stretch;
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 10px 14px;
+  border: 1px dashed var(--line); border-radius: 10px;
+  font-size: 11px; color: var(--muted);
+}
+.message-event p { margin: 0; line-height: 1.7; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.message-event__glyph { font-size: 12px; color: var(--ink); line-height: 1.7; }
+
+/* empty state with starters */
+.chat-empty { display: flex; flex-direction: column; gap: 26px; }
+.chat-empty__group { display: flex; flex-direction: column; gap: 12px; padding-left: 37px; }
+.chat-empty__group .eyebrow { font-size: 7px; letter-spacing: 1.6px; }
+.chat-starters { justify-content: flex-start; flex-wrap: wrap; margin-top: 0; }
+.chat-example {
+  text-align: left; font-size: 11px; line-height: 1.7; color: var(--muted);
+  padding: 10px 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--chat-soft);
+  display: flex; gap: 8px;
+}
+.chat-example:hover { opacity: 1; color: var(--ink); border-color: #aaa; }
+.chat-resume { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.chat-resume__item {
+  display: flex; flex-direction: column; gap: 5px;
+  padding: 11px 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
+  font-size: 11px;
+}
+.chat-resume__item strong { font-weight: 500; }
+.chat-resume__item small { font-size: 8px; color: var(--faint); letter-spacing: .4px; }
+.chat-resume__item:hover { border-color: #aaa; }
+.dark .prompts.chat-starters button { background: #222b; color: #ddd; }
+
+/* dock + stop */
+.chat-dock-wrap { position: relative; }
+.chat-dock-wrap.is-busy .keyboard { visibility: hidden; }
+.chat-stop {
+  position: absolute; right: 70px; bottom: 12px;
+  font-size: 9px; color: var(--muted);
+  border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; background: var(--surface);
+}
+
+/* lists inside insight cards */
+.chat-list { list-style: none; margin: 0; padding: 12px 19px 14px; display: flex; flex-direction: column; gap: 12px; }
+.chat-list__item { display: flex; gap: 10px; align-items: flex-start; }
+.chat-list__item p { margin: 0; font-size: 10px; line-height: 1.6; color: var(--ink); }
+.chat-list__item small { display: block; margin-top: 4px; font-size: 8px; line-height: 1.5; color: var(--faint); }
+.chat-list__glyph { font-size: 11px; line-height: 1.5; color: var(--muted); min-width: 12px; }
+.chat-list__glyph--mono { font: 8px var(--font-mono); padding-top: 2px; letter-spacing: .4px; }
+.chat-list__item--proposed { padding: 10px; border: 1px dashed var(--line); border-radius: 10px; margin: 0 -4px; }
+.chat-list__item--proposed p { color: var(--muted); }
+.chat-list__actions { display: flex; gap: 6px; margin-top: 9px; flex-wrap: wrap; }
+.chat-mini {
+  font-size: 9px; padding: 5px 9px; border-radius: 6px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+}
+.chat-mini--ink { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.chat-mini:disabled { opacity: .45; }
+.next-step { color: var(--ink) !important; }
+
+/* sources */
+.sources-body { padding: 12px 19px 16px; display: flex; flex-direction: column; gap: 10px; }
+.sources-hint { margin: 0; font-size: 9px; color: var(--faint); line-height: 1.6; }
+.source-chips { display: flex; flex-direction: column; gap: 6px; }
+.source-chip {
+  display: inline-flex; align-items: center; gap: 6px; max-width: 100%;
+  font-size: 9px; padding: 5px 9px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface);
+  text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.source-chip[aria-expanded="true"] { border-color: var(--focus); }
+.source-excerpt { margin: 6px 0 2px; font-size: 9px; line-height: 1.6; color: var(--muted); }
+.source-excerpt a { display: block; margin-top: 4px; text-decoration: underline; color: var(--ink); }
+.source-form { display: flex; gap: 6px; }
+.source-form input {
+  flex: 1; min-width: 0; font-size: 10px; padding: 6px 9px;
+  border: 1px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--ink);
+}
+.source-form input:focus { outline: none; border-color: var(--focus); }
+.source-error { margin: 0; font-size: 9px; color: var(--ink); }
+
+@media (max-width: 1100px) {
+  .chat-list { padding: 11px 14px 13px; }
+  .sources-body { padding: 11px 14px 14px; }
+  .chat-empty__group { padding-left: 0; }
+}
+
+@media (max-width: 640px) {
+  .chat-empty { gap: 18px; }
+  .chat-resume { grid-template-columns: 1fr; }
+  .chat-stop { right: 56px; bottom: 9px; }
+  .chat-list { padding: 8px 12px 10px; gap: 8px; }
+  .chat-list__item p { font-size: 8px; }
+  .questions-card, .hypotheses-card, .next-card, .sources-card { border-top: 1px solid var(--line); }
+  .sources-card, .hypotheses-card { grid-column: 1 / -1; }
+  .stage-link { display: none; }
+}
+
+.dark .map-node .node-ring { fill: none; stroke: #8a8a85; }
