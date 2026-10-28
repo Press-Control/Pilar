@@ -97,9 +97,19 @@ curl -N -X POST localhost:3100/api/chat -H 'content-type: application/json' \
   -d '{"messages":[{"role":"user","content":"Hola Pilar"}]}'
 ```
 
+Con `"mode": "voice"` (lo manda el modo voz) se agrega al prompt una instrucción para respuestas habladas más cortas (≤40 palabras, sin negritas). El canal `UPDATES` no cambia.
+
 ### `POST /api/tts`
 
-`{ "text": "…" }` → `audio/mpeg` (ElevenLabs).
+`{ "text": "…", "fast"?: true }` → `audio/mpeg` (ElevenLabs flash v2.5; `fast` usa mp3 de 32 kbps para frases cortas del modo voz).
+
+### `POST /api/stt`
+
+Cuerpo: el audio crudo (`audio/webm` de `MediaRecorder`, también mp4/mp3/wav) con su `Content-Type` → `{ "text", "ms" }` (ElevenLabs Speech to Text, modelo `scribe_v1`, idioma `es`; `ELEVENLABS_STT_MODEL` lo cambia). Máx. 8 MB; un reintento si falla la red.
+
+```sh
+curl -s -X POST localhost:3100/api/stt -H 'content-type: audio/mpeg' --data-binary @frase.mp3
+```
 
 ### `POST /api/scrape`
 
@@ -119,10 +129,12 @@ curl -s localhost:3100/api/health
 |---|---|---|
 | `/` | Inicio con el compositor; enviar abre el chat | — |
 | `/dashboard` | Ideas, recorrido, mapa de la idea, siguiente paso | `?idea=<id>` |
-| `/chat` | Conversación con Pilar y panel del modelo de la idea | `?q=<texto>`, `?idea=<id>` |
+| `/chat` | Conversación con Pilar y panel del modelo de la idea | `?q=<texto>`, `?idea=<id>`, `?modo=voz` |
 | `/lab` | Decision Lab: comparar 2–5 alternativas | `?idea=<id>` |
 
 IDs de ejemplo: `cocina-barrio`, `hilo-builders`.
+
+**Modo voz** (`/chat?modo=voz` o el selector «Texto / Voz»): la columna de conversación se reemplaza por una esfera (escuchando / pensando / hablando) con subtítulos del último turno; el resto de la vista, el backend y la persistencia son los mismos. Ciclo: micrófono → detección de voz (RMS, ~1 s de silencio cierra el turno; «Ya terminé» o tocar la esfera lo cierra a mano) → `/api/stt` → `/api/chat` (`mode: "voice"`) → cada frase del stream va a `/api/tts` y se reproduce en orden. No escucha mientras Pilar piensa o habla; «Interrumpir» la detiene. Requiere `localhost` o https para el micrófono.
 
 ## Estructura
 
@@ -131,7 +143,7 @@ src/
   app/
     page.tsx              Inicio
     dashboard/ chat/ lab/ Páginas
-    api/                  chat, tts, scrape, health
+    api/                  chat, tts, stt, scrape, health
     globals.css           Tokens y estilos base
   components/
     shell/                Layout, navegación, preferencias, tema

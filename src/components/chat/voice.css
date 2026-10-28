@@ -95,8 +95,14 @@
 .voice-metrics { font: 8px var(--font-mono, monospace); color: var(--faint); letter-spacing: .4px; }
 
 @media (max-width: 640px) {
-  .voice-panel { gap: 14px; padding: 14px 13px 10px; justify-content: flex-start; }
-  .voice-orb { --size: 84px; }
+  .voice-panel { gap: 10px; padding: 10px 13px 10px; justify-content: flex-start; }
+  .voice-orb { --size: 64px; width: 104px; height: 104px; }
+  .voice-orb__core { font-size: 20px; }
+  .voice-stage { gap: 4px; }
+  .voice-state { font-size: 12px; }
+  .voice-captions { gap: 6px; }
+  .voice-caption p { -webkit-line-clamp: 3; }
+  .voice-caption--guide p { -webkit-line-clamp: 4; }
   .voice-caption { grid-template-columns: 1fr; gap: 2px; }
   .voice-caption p { font-size: 11px; }
   .voice-caption--guide p { font-size: 12px; }
