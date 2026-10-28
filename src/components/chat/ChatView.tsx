@@ -10,6 +10,7 @@ import { streamChat } from "@/lib/chat-types";
 import { DEMO_SCRIPT, HOME_PROMPTS, JOURNEY_STAGES, ideas as fixtureIdeas } from "@/lib/fixtures";
 import { InsightPanel } from "./InsightPanel";
 import { ListenButton } from "./ListenButton";
+import { VoicePanel } from "./VoicePanel";
 import {
   STORAGE_PREFIX,
   applyUpdates,
@@ -58,7 +59,7 @@ function plainExcerpt(md: string, max = 280): string {
   return text.length > max ? `${text.slice(0, max).replace(/\s\S*$/, "")}…` : text;
 }
 
-export function ChatView({ ideaId, firstPrompt }: { ideaId?: string; firstPrompt?: string }) {
+export function ChatView({ ideaId, firstPrompt, initialMode = "texto" }: { ideaId?: string; firstPrompt?: string; initialMode?: "texto" | "voz" }) {
   const router = useRouter();
   const notify = useToast();
   const storeKey = `${STORAGE_PREFIX}${ideaId ?? "nueva"}`;
@@ -73,6 +74,9 @@ export function ChatView({ ideaId, firstPrompt }: { ideaId?: string; firstPrompt
   const [touched, setTouched] = useState<Set<string>>(new Set());
   const [caption, setCaption] = useState<string | null>(null);
   const [entering, setEntering] = useState(!!firstPrompt);
+  const [mode, setModeState] = useState<"texto" | "voz">(initialMode);
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
 
   const messagesRef = useRef<UIMessage[]>([]);
   const stateRef = useRef<IdeaState>(state);
@@ -110,7 +114,7 @@ export function ChatView({ ideaId, firstPrompt }: { ideaId?: string; firstPrompt
       let received = "";
       try {
         const res = await streamChat(
-          { messages: toWire(history), ideaId },
+          { messages: toWire(history), ideaId, ...(modeRef.current === "voz" ? { mode: "voice" as const } : {}) },
           (t) => {
             received = t;
             patch((m) => ({ ...m, content: t }));
@@ -179,6 +183,17 @@ export function ChatView({ ideaId, firstPrompt }: { ideaId?: string; firstPrompt
 
   const stop = useCallback(() => abortRef.current?.abort(), []);
 
+  /** Texto / Voz. Same messages, state and persistence; only the conversation column changes. */
+  const setMode = useCallback((next: "texto" | "voz") => {
+    setModeState(next);
+    try {
+      const url = new URL(window.location.href);
+      if (next === "voz") url.searchParams.set("modo", "voz");
+      else url.searchParams.delete("modo");
+      window.history.replaceState(null, "", `${url.pathname}${url.search}`);
+    } catch {}
+  }, []);
+
   /* ------------------------------------------------------------------ boot: ?q=, storage or fixture */
   useEffect(() => {
     if (booted.current) return;
@@ -192,7 +207,10 @@ export function ChatView({ ideaId, firstPrompt }: { ideaId?: string; firstPrompt
         sessionStorage.removeItem("pilar-first-prompt");
       } catch {}
       // Strip ?q= so a reload restores the saved conversation instead of sending again.
-      window.history.replaceState(null, "", ideaId ? `/chat?idea=${encodeURIComponent(ideaId)}` : "/chat");
+      const qs = new URLSearchParams();
+      if (ideaId) qs.set("idea", ideaId);
+      if (initialMode === "voz") qs.set("modo", "voz");
+      window.history.replaceState(null, "", qs.size ? `/chat?${qs}` : "/chat");
       void send(firstPrompt.trim());
       return;
     }
@@ -202,7 +220,7 @@ export function ChatView({ ideaId, firstPrompt }: { ideaId?: string; firstPrompt
     commitMessages(snap.messages);
     setEngine(snap.engine ?? null);
     setReady(true);
-  }, [commitMessages, commitState, firstPrompt, ideaId, send, storeKey]);
+  }, [commitMessages, commitState, firstPrompt, ideaId, initialMode, send, storeKey]);
 
   useEffect(() => {
     if (!entering) return;
@@ -363,9 +381,19 @@ export function ChatView({ ideaId, firstPrompt }: { ideaId?: string; firstPrompt
             </h2>
             <p>La conversación avanza. Tu idea toma forma.</p>
           </div>
-          <span className={`session-badge${busy ? " is-busy" : ""}`} title={live ? "Responde un interlocutor en vivo" : "Responde la guía local de la demo"}>
-            <span className="live-dot" /> {live ? "Interlocutor en vivo" : "Guía local"}
-          </span>
+          <div className="heading-actions">
+            <div className="mode-toggle" role="group" aria-label="Modo de conversación">
+              <button type="button" aria-pressed={mode === "texto"} onClick={() => setMode("texto")}>
+                Texto
+              </button>
+              <button type="button" aria-pressed={mode === "voz"} onClick={() => setMode("voz")}>
+                Voz
+              </button>
+            </div>
+            <span className={`session-badge${busy ? " is-busy" : ""}`} title={live ? "Responde un interlocutor en vivo" : "Responde la guía local de la demo"}>
+              <span className="live-dot" /> {live ? "Interlocutor en vivo" : "Guía local"}
+            </span>
+          </div>
         </div>
 
         <div className="thinking-space">
@@ -388,9 +416,14 @@ export function ChatView({ ideaId, firstPrompt }: { ideaId?: string; firstPrompt
           <div className="thinking-grid">
             <section className="chat-column" aria-label="Conversación">
               <div className="block-heading">
-                <span>↳ &nbsp; Tu conversación</span>
+                <span>↳ &nbsp; {mode === "voz" ? "Conversación en voz" : "Tu conversación"}</span>
                 <span className="chat-status">{busy ? "La idea toma forma…" : "A tu ritmo"}</span>
               </div>
+
+              {mode === "voz" ? (
+                <VoicePanel messages={messages} busy={busy} onSend={(t) => void send(t)} onStop={stop} onExit={() => setMode("texto")} />
+              ) : (
+              <>
 
               <div className="messages" id="messages" ref={listRef} role="log" aria-label="Mensajes de la conversación" aria-live="polite">
                 {ready && messages.length === 0 ? <EmptyChat onPick={pickStarter} /> : null}
@@ -481,6 +514,8 @@ export function ChatView({ ideaId, firstPrompt }: { ideaId?: string; firstPrompt
               <div className="local-note">
                 Guardado en este navegador <span>·</span> Un espacio para pensar a tu ritmo
               </div>
+              </>
+              )}
             </section>
 
             <InsightPanel state={state} messages={messages} touched={touched} onAccept={acceptDecision} onDiscard={discardDecision} onAddSource={addSource} />

@@ -33,25 +33,34 @@ export async function POST(req: Request) {
   const { apiKey, language } = elevenLabsSettings();
   if (!apiKey) return err("La voz no está configurada en este equipo.", 503);
 
-  const form = new FormData();
-  form.append("model_id", MODEL);
-  form.append("language_code", language || "es");
-  form.append("tag_audio_events", "false");
-  form.append("diarize", "false");
-  form.append("file", new Blob([buf], { type }), `turno.${extFor(type)}`);
-
-  const t0 = performance.now();
-  let res: Response;
-  try {
-    res = await fetch("https://api.elevenlabs.io/v1/speech-to-text", {
+  const send = () => {
+    const form = new FormData();
+    form.append("model_id", MODEL);
+    form.append("language_code", language || "es");
+    form.append("tag_audio_events", "false");
+    form.append("diarize", "false");
+    form.append("file", new Blob([buf], { type }), `turno.${extFor(type)}`);
+    return fetch("https://api.elevenlabs.io/v1/speech-to-text", {
       method: "POST",
       headers: { "xi-api-key": apiKey },
       body: form,
-      signal: AbortSignal.any([req.signal, AbortSignal.timeout(30_000)]),
+      signal: AbortSignal.any([req.signal, AbortSignal.timeout(12_000)]),
     });
-  } catch {
-    return err("No pudimos contactar al servicio de voz.", 502);
+  };
+
+  const t0 = performance.now();
+  let res: Response | null = null;
+  // One retry on network failure/timeout: the venue network is flaky and a voice turn is cheap to resend.
+  for (let attempt = 1; attempt <= 2 && !res; attempt++) {
+    try {
+      res = await send();
+    } catch (e) {
+      const cause = e instanceof Error ? `${e.name}${e.cause instanceof Error ? `/${e.cause.name}` : ""}` : "error";
+      console.warn(`[pilar] stt request failed (attempt ${attempt}): ${cause}`);
+      if (req.signal.aborted) return err("Solicitud cancelada.", 499);
+    }
   }
+  if (!res) return err("No pudimos contactar al servicio de voz.", 502);
   if (!res.ok) {
     console.warn(`[pilar] stt failed: HTTP ${res.status}`);
     const msg =
