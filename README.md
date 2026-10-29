@@ -1,193 +1,92 @@
-# puente-poc
+# El Pilar: think out loud until the idea exists
 
-Prueba de concepto web de **El Pilar**: un chat con una interlocutora de IA (Pilar) que va construyendo, en vivo, un modelo estructurado de la idea del usuario (decisiones, hipótesis, preguntas, siguiente paso).
+**Hacktoberfest México 2026 · MLH · Best Use of ElevenLabs · Best Use of Firecrawl**
 
-El contexto de producto está en [`../CONTEXTO_EL_PUENTE.md`](../CONTEXTO_EL_PUENTE.md). Este README es solo técnico. Guion de presentación: [`DEMO.md`](DEMO.md).
+> *De la intuición a la decisión.* El Pilar is a space to think. You talk with **Pilar**, an AI interlocutor that questions your idea instead of applauding it. While you talk, she builds a living model of your idea: decisions, hypotheses, open questions and a concrete next step.
+
+![El Pilar: voice mode with the live idea map](docs/img/voz.png)
+
+## The problem
+
+People with an idea (a software architect, a researcher, a student, a founder) talk to a chatbot to make it clearer, and end up with an endless scroll. They lose the thread, they can't tell whether they're done or just tired, and the assistant tends to agree with everything.
+
+## The idea
+
+Pilar is an **interlocutor, not a ghostwriter**. Her job is to help the idea take shape, not to word it nicely:
+
+- **One good question at a time.** No walls of text.
+- **No flattery.** She objects once, with a reason, then respects your decision. She never says an idea "is validated" or "will work".
+- **Scientific method.** She separates what you claim from what is proven. Every important assumption becomes a hypothesis with a test and a refutation condition written in advance.
+- **Your judgment rules.** Pilar proposes; you decide what goes into the model of your idea.
+- **A stopping criterion.** An idea is ready to validate when no critical question is open and every key hypothesis has a concrete way to be checked. "Ready" does not mean "true".
+
+The journey has four stages, shown live: **La intuición → Darle forma → Poner a prueba → El siguiente paso**.
+
+## How we use ElevenLabs: Pilar has ears and a voice
+
+Thinking out loud is literal here. ElevenLabs is the whole voice loop, not a "read aloud" button.
+
+| | ElevenLabs API | What it does in El Pilar |
+|---|---|---|
+| 👂 Ears | **Speech to Text** (`scribe_v1`, Spanish) | Voice mode records you; when you stop talking (voice activity detection, ~1.3 s of silence) the audio goes to `/api/stt` and comes back as your turn. ~0.3–0.8 s per utterance. |
+| 🗣️ Voice | **Text to Speech streaming** (`eleven_flash_v2_5`, Mexican Spanish voice) | Pilar's reply is spoken **sentence by sentence while the LLM is still streaming**, so she starts talking ~0.2 s after the first sentence exists. |
+| ☎️ Phone | TTS audio played inside a **Twilio** call | "Llamarme": Pilar calls your phone and keeps the conversation there, with her ElevenLabs voice, while the web page updates live. |
+
+Voice mode replaces the chat column with a listening / thinking / speaking orb and live captions. **Everything else stays identical**: the same brain, the same idea map, decisions and hypotheses updating as you speak. You can switch between text and voice at any moment without losing the conversation. In voice mode Pilar answers shorter and in natural spoken Spanish.
+
+Measured latency (venue wifi): speech-to-text 0.3–1.6 s, transcript to first audio 2.5–3.1 s.
+
+## How we use Firecrawl: Pilar contrasts your idea with the world
+
+An idea checked only against what its owner believes is not checked. **Firecrawl gives Pilar eyes outside the conversation.**
+
+- **Today (working):** in the chat you paste a URL in "Agregar fuente". The server calls Firecrawl `/v2/scrape` (main content only, as markdown), keeps the title and a clean excerpt, and adds it as a source of the idea. From then on the source is part of Pilar's context, so she uses it to confirm, contradict or leave open your assumptions. The Firecrawl key never reaches the browser.
+- **The goal:** every critical hypothesis is linked to the sources that support or refute it, and the panel shows which assumptions still have **no evidence**. Sources include PDFs and DOCX (papers for researchers, RFCs and vendor docs for architects), stored as files of the idea. Pilar suggests *which* evidence to bring when a claim needs it; the person decides what goes in.
+
+## Real cases (in the app)
+
+The chat opens with real conversations recorded against the live engine, cut mid-process so you can continue them live:
+
+| Context | Case |
+|---|---|
+| Industry · Software architecture | From a payments monolith to services: build vs buy, a latency hypothesis at 300 payments/s |
+| Industry · Product · MVP | Payroll export MVP: first customer, out of scope, a refutable metric |
+| Industry · Technical strategy · AI | AI in customer support: a pilot with kill criteria |
+| Academic · Student | Understanding Bayes for a final project |
+| Academic · Research | Food delivery and ultra-processed food in university students |
+| Academic · Thesis | Master's thesis: LLMs and feedback for programming students |
+| Everyday · Entrepreneurship | Home-made mole in jars |
+
+| | |
+|---|---|
+| ![Chat with the live side panel](docs/img/chat.png) | ![Dashboard: the idea map and its hypotheses](docs/img/dashboard.png) |
+
+## What's in the app
+
+- **Inicio**: "¿Qué tienes en mente?"
+- **Cuaderno (`/chat`)**: text or voice conversation with Pilar, plus the live idea map, decisions, open questions, hypotheses, sources and next step.
+- **Tus ideas (`/dashboard`)**: each idea's journey: "Empezó como → Hoy es", the map, and what is still missing.
+- **Decision Lab (`/lab`)**: compare 2–5 alternatives side by side before choosing.
+- **Llamarme**: continue the conversation over a phone call (Twilio + ElevenLabs).
 
 ## Stack
 
-- Next.js 16.4 (App Router, Turbopack), React 19.3, TypeScript 7
-- `@anthropic-ai/sdk` para el LLM
-- ElevenLabs (texto a voz) y Firecrawl (lectura de URLs) vía `fetch`
-- CSS propio con los tokens del style guide (`../design/el-pilar-style-guide/`); sin Tailwind
-- Sin base de datos: datos de ejemplo en `src/lib/fixtures.ts` y estado del chat en `localStorage`
+Next.js 16 (App Router), React 19, TypeScript. Claude (Anthropic API, streaming) as the brain; ElevenLabs (STT + streaming TTS) as ears and voice; Firecrawl for sources; Twilio for phone calls. API keys live only on the server. No database: ideas live in the browser for this prototype.
 
-## Requisitos
-
-- Node 24
-- pnpm 12
-
-## Inicio rápido
+## Run it
 
 ```sh
 pnpm install
-cp .env.example .env.local   # o créalo a mano, ver "Configuración"
+cp .env.example .env.local   # ANTHROPIC_API_KEY, ELEVENLABS_API_KEY, FIRECRAWL_API_KEY
 pnpm dev                     # http://localhost:3100
 ```
 
-| Script | Qué hace |
-|---|---|
-| `pnpm dev` | Servidor de desarrollo en el puerto 3100 |
-| `pnpm build` | Build de producción |
-| `pnpm start` | Sirve el build en el puerto 3100 |
-| `pnpm typecheck` | `tsc --noEmit` |
+Then open `/chat`, pick a real case on the left, or switch to **Voz** and talk. Full technical reference (API routes, engines, fallbacks, Railway deploy, phone setup): [`docs/TECNICO.md`](docs/TECNICO.md).
 
-Solo puede correr un `next dev` a la vez en este directorio.
+## Honest status
 
-## Configuración
+This is a hackathon prototype built in one day. The example ideas are preloaded fixtures, and conversations are stored only in the browser. Linking sources to hypotheses (the Firecrawl goal above) is designed but not built yet. Pilar never claims an idea is good: she shows what is missing before you can know.
 
-Variables en `.env.local` (está en `.gitignore`):
+## Credits
 
-| Variable | Default | Descripción |
-|---|---|---|
-| `LLM_PROVIDER` | auto | `anthropic`, `claude-cli`, `mock`, o vacío para auto |
-| `ANTHROPIC_API_KEY` | — | Requerida para `anthropic` |
-| `LLM_MODEL` | `claude-opus-5-5` | Modelo de la API |
-| `LLM_EFFORT` | `low` | Esfuerzo de razonamiento |
-| `CLAUDE_BIN` | `claude` en el `PATH` | Binario para `claude-cli` |
-| `ELEVENLABS_API_KEY` | `~/.puente/config.json` | Voz |
-| `ELEVENLABS_VOICE_ID` | voz por defecto | Voz de ElevenLabs |
-| `FIRECRAWL_API_KEY` | `~/.puente/config.json` | Lectura de fuentes |
-| `PUENTE_HOME` | `~/.puente` | Carpeta del `config.json` |
-
-Las keys de ElevenLabs y Firecrawl se pueden tomar del archivo compartido con el proyecto `el-puente`:
-
-```json
-// ~/.puente/config.json
-{ "elevenlabs": { "apiKey": "…", "language": "es" }, "firecrawl": { "apiKey": "…" } }
-```
-
-Las keys solo se leen en el servidor (`src/lib/server/secrets.ts`) y nunca llegan al navegador. Reinicia `pnpm dev` después de cambiar `.env.local`.
-
-## Motores de LLM
-
-`src/lib/server/llm.ts` abstrae tres motores con la misma salida en streaming:
-
-| Motor | Cómo funciona | Primer texto / total (medido) |
-|---|---|---|
-| `anthropic` | Messages API con streaming y prompt caching | ~1.3–3 s / 4–8 s |
-| `claude-cli` | Lanza `claude -p --output-format stream-json` por turno, sin herramientas; usa el login local de Claude Code | ~2–7 s / 6–13 s |
-| `mock` | Respuestas guionadas locales, sin red | ~0.5 s / 1.5 s |
-
-**Fallback:** si un motor falla o no entrega texto en 15 s (`anthropic`) o 25 s (`claude-cli`), la petición pasa al siguiente: `anthropic` → `claude-cli` → `mock`. El header de respuesta `X-Pilar-Engine` indica qué motor respondió.
-
-En desarrollo se puede forzar un motor por petición con el header `X-Pilar-Provider: anthropic|claude-cli|mock` (desactiva el fallback).
-
-El system prompt de Pilar está en `src/lib/server/prompt.ts`. Si llega `ideaId`, se le agrega el contexto de esa idea.
-
-## API
-
-### `POST /api/chat`
-
-```json
-{ "messages": [{ "role": "user", "content": "…" }], "ideaId": "cocina-barrio" }
-```
-
-Responde `text/plain` en streaming. Al final del texto visible puede venir una línea con datos estructurados:
-
-```
-…¿Qué observación te haría abandonar esa idea?
-<<<UPDATES>>>{"questions":[{"text":"¿…?","critical":true}],"stage":"forma","highlight":"…"}
-```
-
-Campos de `UPDATES` (todos opcionales): `decisions`, `questions`, `hypotheses`, `nextStep`, `stage` (`intuicion | forma | prueba | siguiente`), `highlight`. Tipos y helpers de parseo (`streamChat`, `splitUpdates`, `visibleText`) en `src/lib/chat-types.ts`. Los errores se devuelven como JSON `{ "error": "…" }` con el mensaje en español.
-
-```sh
-curl -N -X POST localhost:3100/api/chat -H 'content-type: application/json' \
-  -d '{"messages":[{"role":"user","content":"Hola Pilar"}]}'
-```
-
-Con `"mode": "voice"` (lo manda el modo voz) se agrega al prompt una instrucción para respuestas habladas más cortas (≤40 palabras, sin negritas). El canal `UPDATES` no cambia.
-
-### `POST /api/tts`
-
-`{ "text": "…", "fast"?: true }` → `audio/mpeg` (ElevenLabs flash v2.5; `fast` usa mp3 de 32 kbps para frases cortas del modo voz).
-
-### `POST /api/stt`
-
-Cuerpo: el audio crudo (`audio/webm` de `MediaRecorder`, también mp4/mp3/wav) con su `Content-Type` → `{ "text", "ms" }` (ElevenLabs Speech to Text, modelo `scribe_v1`, idioma `es`; `ELEVENLABS_STT_MODEL` lo cambia). Máx. 8 MB; un reintento si falla la red.
-
-```sh
-curl -s -X POST localhost:3100/api/stt -H 'content-type: audio/mpeg' --data-binary @frase.mp3
-```
-
-### `POST /api/scrape`
-
-`{ "url": "https://…" }` → `{ "title", "url", "markdown", "truncated" }` (Firecrawl, markdown truncado a ~4k caracteres).
-
-### `GET /api/health`
-
-Motor activo, modelo, disponibilidad de cada key (solo booleanos) y latencia del último turno.
-
-```sh
-curl -s localhost:3100/api/health
-```
-
-## Llamada telefónica («Llamarme»)
-
-En `/chat`, el botón **☏ Llamarme** (junto a la etapa) hace que Twilio llame a tu teléfono. Pilar conversa contigo por voz con el mismo prompt y motor que el chat (estilo voz: ≤40 palabras, sin Markdown) y la página se actualiza en vivo: subtítulos de la llamada, mensajes en el chat y el panel lateral (mapa, decisiones, preguntas, hipótesis, siguiente paso) con el trailer `<<<UPDATES>>>`. Al colgar, todo queda en la conversación (localStorage).
-
-Flujo: `POST /api/call/start` → Twilio REST *create call* → Twilio pide `POST /api/call/twiml` (saludo + `<Gather input="speech" language="es-MX">`) → cada frase llega a `POST /api/call/turn` (LLM ≤9 s; si tarda más, dice «Dame un segundo» y `<Redirect>` a `?wait=1`) → la respuesta se sintetiza con ElevenLabs `eleven_flash_v2_5` y se sirve como mp3 desde memoria en `GET /api/call/audio?id=…` (`<Play>`; si la voz falla, `<Say language="es-MX">`). Silencio: un recordatorio y luego despedida y `<Hangup/>`. `POST /api/call/status` (status callback) marca la llamada como terminada. La página consulta `GET /api/call/state?session=…&since=N` cada segundo. Sesiones y audios viven en memoria del proceso (se pierden al reiniciar). Los webhooks validan `X-Twilio-Signature`; además el id de sesión no es adivinable.
-
-Para activarlo en la demo:
-
-1. En `.env.local` agrega `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM` (tu número de Twilio, formato `+1…`) y opcionalmente `TWILIO_DEFAULT_TO` (tu celular `+52…`, prellena el campo). Con cuenta de prueba, el número destino debe estar verificado en Twilio.
-2. Expón el servidor con un túnel (tú decides cuál; la app no lo abre por ti):
-   ```sh
-   pnpm exec next dev -p 3103            # o el puerto que uses
-   # opción A
-   brew install cloudflared && cloudflared tunnel --url http://localhost:3103
-   # opción B
-   ngrok http 3103                       # URL en http://localhost:4040/api/tunnels
-   ```
-3. Pon la URL https del túnel en `.env.local` como `PUBLIC_BASE_URL=https://xxxx.trycloudflare.com` (sin `/` final) y **reinicia** el servidor (las variables se leen al arrancar). Si cambia la URL del túnel, actualízala y reinicia.
-4. Revisa `GET /api/call/health` (solo booleanos). Si falta algo, el botón explica qué variable falta en lugar de fallar.
-
-Simulación local sin llamar (solo en desarrollo): `POST /api/call/start {"dryRun":true}` crea una sesión; abre `/chat?callSession=<id>` y envía webhooks firmados a `/api/call/twiml` y `/api/call/turn` (form `SpeechResult=…`). Con `TWILIO_SKIP_SIGNATURE=1` se omite la validación de firma.
-
-## Rutas
-
-| Ruta | Vista | Parámetros |
-|---|---|---|
-| `/` | Inicio con el compositor; enviar abre el chat | — |
-| `/dashboard` | Ideas, recorrido, mapa de la idea, siguiente paso | `?idea=<id>` |
-| `/chat` | Conversación con Pilar y panel del modelo de la idea | `?q=<texto>`, `?idea=<id>`, `?modo=voz` |
-| `/lab` | Decision Lab: comparar 2–5 alternativas | `?idea=<id>` |
-
-IDs de ejemplo: `cocina-barrio`, `hilo-builders`.
-
-**Modo voz** (`/chat?modo=voz` o el selector «Texto / Voz»): la columna de conversación se reemplaza por una esfera (escuchando / pensando / hablando) con subtítulos del último turno; el resto de la vista, el backend y la persistencia son los mismos. Ciclo: micrófono → detección de voz (RMS, ~1 s de silencio cierra el turno; «Ya terminé» o tocar la esfera lo cierra a mano) → `/api/stt` → `/api/chat` (`mode: "voice"`) → cada frase del stream va a `/api/tts` y se reproduce en orden. No escucha mientras Pilar piensa o habla; «Interrumpir» la detiene. Requiere `localhost` o https para el micrófono.
-
-## Estructura
-
-```
-src/
-  app/
-    page.tsx              Inicio
-    dashboard/ chat/ lab/ Páginas
-    api/                  chat, tts, stt, scrape, health
-    globals.css           Tokens y estilos base
-  components/
-    shell/                Layout, navegación, preferencias, tema
-    ui/                   Primitivas (Button, Card, Chip, PromptComposer…)
-    chat/ dashboard/ lab/ Componentes por vista
-  lib/
-    chat-types.ts         Contrato de /api/chat
-    fixtures.ts           Datos de ejemplo
-    types.ts              Tipos de dominio
-    server/               llm, prompt, mock, secrets (solo servidor)
-  styles/                 CSS de referencia del style guide
-```
-
-## Limitaciones conocidas
-
-- Es un POC: las ideas del dashboard y del Decision Lab son fixtures, y las ideas nuevas del chat no aparecen en el dashboard.
-- El análisis del Decision Lab es local; no llama al LLM.
-- Persistencia solo en `localStorage`; sin cuentas ni base de datos.
-- Con varias conversaciones simultáneas contra la API, algunas respuestas se congelaron a mitad del stream (~2 min). El fallback solo cubre el primer token; falta un timeout de inactividad a mitad de respuesta.
-- En `pnpm dev`, React Strict Mode envía dos veces el primer mensaje de `?q=` (el primero se cancela). No pasa en producción.
-- `claude-cli` lanza un proceso nuevo por turno (+1–2 s).
-
-## Pruebas
-
-No hay suite automatizada. El reporte de QA de conversación está en [`QA_CONVERSACION.md`](QA_CONVERSACION.md).
+ASCII ocean background adapted from [stackedlol/ascii-sharks](https://github.com/stackedlol/ascii-sharks) (MIT); see `THIRD_PARTY_NOTICES.md`. Licensed under MIT.
