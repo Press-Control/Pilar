@@ -8,7 +8,7 @@ import { GuideMark, PromptComposer } from "@/components/ui";
 import { useToast } from "@/components/shell/preferences";
 import { streamChat } from "@/lib/chat-types";
 import { DEMO_SCRIPT, HOME_PROMPTS, JOURNEY_STAGES } from "@/lib/fixtures";
-import { ConversationCards, ConversationsDrawer, useConversations } from "./ConversationList";
+import { CaseLinks, ConversationCards, ConversationsDrawer, useConversations } from "./ConversationList";
 import { InsightPanel } from "./InsightPanel";
 import { ListenButton } from "./ListenButton";
 import { VoicePanel } from "./VoicePanel";
@@ -383,6 +383,7 @@ export function ChatView({ ideaId, firstPrompt, initialMode = "texto", openList 
         <button type="button" className="convo-open" onClick={() => setConvoOpen(true)}>
           <span aria-hidden="true">☰</span> Conversaciones
         </button>
+        <CaseLinks currentId={ideaId} />
         <div className="eyebrow journey-label">TU RECORRIDO</div>
         <ol className="journey-steps">
           {JOURNEY_STAGES.map((s, i) => (

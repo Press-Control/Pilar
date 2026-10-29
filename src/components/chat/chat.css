@@ -202,3 +202,13 @@
 }
 
 .dark .map-node .node-ring { fill: none; stroke: #8a8a85; }
+
+/* Tags on conversation cards + always-visible list of real cases (left column) */
+.convo-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.convo-tags span { font: 9px var(--font-mono, monospace); letter-spacing: .3px; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 7px; }
+.case-links { margin: 14px 0 6px; }
+.case-links ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 2px; max-height: 300px; overflow-y: auto; }
+.case-links a { display: grid; gap: 2px; padding: 7px 10px; border-radius: var(--radius-control, 8px); color: var(--ink); text-decoration: none; }
+.case-links a:hover, .case-links a.is-current { background: var(--soft, rgba(0,0,0,.05)); }
+.case-links__tag { font: 8.5px var(--font-mono, monospace); letter-spacing: .4px; text-transform: uppercase; color: var(--muted); }
+.case-links__title { font-size: 12.5px; line-height: 1.3; }

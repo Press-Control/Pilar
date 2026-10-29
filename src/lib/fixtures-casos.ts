@@ -1,5 +1,5 @@
 /**
- * Casos reales: conversaciones grabadas contra el backend en vivo (28 oct 2026; motor anthropic) y convertidas en ideas.
+ * Casos reales, cortados a mitad del proceso para la demo: conversaciones grabadas contra el backend en vivo (28 oct 2026; motor anthropic) y convertidas en ideas.
  * Los mensajes son el texto real de cada turno (sin el canal <<<UPDATES>>>). Decisiones, hipótesis, preguntas,
  * frases y siguiente paso se derivan acumulando esos UPDATES con la misma lógica que el chat (model.ts applyUpdates):
  * dedupe por texto y por similitud (gana la versión más reciente), máximo 6 preguntas (las más recientes), decisiones como «propuestas» (nadie las confirmó).
@@ -15,11 +15,11 @@ export const casos: Idea[] = [
     "title": "Del monolito de pagos a servicios",
     "initialPrompt": "Soy arquitecto de software en una fintech de pagos en México. Tenemos un monolito en Rails de 8 años y la dirección quiere «pasar a microservicios». No tengo claro por dónde empezar ni si es lo correcto.",
     "thesis": "La dirección quiere pasar nuestro monolito de pagos en Rails a microservicios; el dolor real son deploys de dos horas, conciliación acoplada a cobros y 4 equipos que se pisan en el mismo repo.",
-    "summary": "Empezó como «pasar a microservicios». Hoy el problema está nombrado como acoplamiento entre conciliación y cobros, con una decisión previa por resolver (comprar o construir conciliación) y una hipótesis de latencia a 300 pagos por segundo que conviene medir antes de elegir eventos.",
-    "status": "convergiendo",
-    "stage": "siguiente",
+    "summary": "Empezó como «Soy arquitecto de software en una fintech de pagos en México. Tenemos un monolito en Rails de 8 años y la dire». En curso: Publicar el evento también ocurre dentro del cobro.",
+    "status": "explorando",
+    "stage": "prueba",
     "createdAt": "2026-10-27T10:20:00-06:00",
-    "updatedAt": "2026-10-27T10:35:40-06:00",
+    "updatedAt": "2026-10-27T10:32:40-06:00",
     "decisions": [],
     "hypotheses": [
       {
@@ -120,20 +120,19 @@ export const casos: Idea[] = [
         "id": "hl5",
         "text": "Publicar el evento también ocurre dentro del cobro",
         "mark": "si"
-      },
-      {
-        "id": "hl6",
-        "text": "Antes de partir el sistema, mapea dónde está pegado",
-        "mark": "si"
       }
     ],
     "proposals": [],
     "nextStep": {
-      "text": "Mapear dependencias entre conciliación y cobros (tablas, modelos, callbacks, llamadas) y cruzarlas con incidentes recientes; hecho cuando cada incidente tenga una dependencia asignada; se refuta si casi ningún incidente se explica por acoplamiento",
-      "why": "Antes de partir el sistema, mapea dónde está pegado",
-      "doneWhen": "Cada incidente reciente tiene asignada una dependencia entre conciliación y cobros; si casi ninguno la tiene, el dolor está en el pipeline y no en el acoplamiento.",
-      "effort": "Dos semanas"
+      "text": "Por definir: primero hay que cerrar la pregunta crítica abierta.",
+      "why": "Publicar el evento también ocurre dentro del cobro",
+      "doneWhen": "Cuando Pilar y tú acuerden una acción concreta para esta semana.",
+      "effort": "Por definir"
     },
+    "tags": [
+      "Industria",
+      "Arquitectura de software"
+    ],
     "messages": [
       {
         "id": "m1",
@@ -194,18 +193,6 @@ export const casos: Idea[] = [
         "role": "assistant",
         "at": "2026-10-27T10:32:40-06:00",
         "content": "Tu supuesto es que conciliación queda fuera del camino crítico y por eso los eventos no tocarían la latencia del cobro. Es una **hipótesis**, y tiene una grieta: publicar el evento sigue ocurriendo dentro del cobro, y si se hace en la misma transacción para no perder ninguno, añade trabajo justo a 300 pagos por segundo. Además, que hoy un cambio en conciliación rompa cobros sugiere que no están tan separados. ¿Qué aumento de latencia en hora pico te haría descartar los eventos?"
-      },
-      {
-        "id": "m11",
-        "role": "user",
-        "at": "2026-10-27T10:35:00-06:00",
-        "content": "Ok. ¿Qué hago en las próximas dos semanas antes de presentarlo a dirección?"
-      },
-      {
-        "id": "m12",
-        "role": "assistant",
-        "at": "2026-10-27T10:35:40-06:00",
-        "content": "Quieres llegar a dirección con algo más sólido que «microservicios». Propongo un solo paso: **mapear cada dependencia entre conciliación y cobros**, es decir, tablas compartidas, modelos, callbacks y llamadas directas, cruzándolas con los incidentes recientes. Estará hecho cuando cada incidente tenga una dependencia asignada; si casi ninguno la tiene, el dolor está en el pipeline y no en el acoplamiento. ¿Qué equipo podría revisarlo contigo para que no sea solo tu mirada?"
       }
     ]
   },
@@ -214,11 +201,11 @@ export const casos: Idea[] = [
     "title": "MVP de exportación de nómina",
     "initialPrompt": "Soy product manager en un SaaS de nómina para pymes. Ventas pide «reportes personalizados» porque dicen que perdemos clientes por eso. Tengo que escribir el spec del MVP.",
     "thesis": "Ventas pide «reportes personalizados»; lo que piden las cuentas es exportar la nómina por centro de costos a su ERP.",
-    "summary": "Empezó como un pedido de ventas. El CRM mostró 9 oportunidades perdidas, casi todas de empresas de más de 200 empleados (el cliente típico tiene 40). El MVP propuesto es una exportación por centro de costos; la métrica pasó de «exportaciones por semana» a oportunidades que avanzan gracias a ella.",
-    "status": "convergiendo",
-    "stage": "siguiente",
+    "summary": "Empezó como «Soy product manager en un SaaS de nómina para pymes. Ventas pide «reportes personalizados» porque dicen que pe». En curso: Lo que dejas fuera también es parte del spec.",
+    "status": "explorando",
+    "stage": "prueba",
     "createdAt": "2026-10-27T16:05:00-06:00",
-    "updatedAt": "2026-10-27T16:20:40-06:00",
+    "updatedAt": "2026-10-27T16:14:40-06:00",
     "decisions": [
       {
         "id": "d1",
@@ -257,17 +244,9 @@ export const casos: Idea[] = [
       {
         "id": "h3",
         "code": "H3",
-        "text": "La exportación por centro de costos a ERP destraba oportunidades de empresas de más de 200 empleados",
+        "text": "La exportación por centro de costos a su ERP basta para recuperar las oportunidades perdidas por reportes",
         "critical": false,
-        "test": "Ofrecerla a las cuentas perdidas o en curso y registrar cuántas avanzan o se cierran",
-        "status": "con-prueba"
-      },
-      {
-        "id": "h4",
-        "code": "H4",
-        "text": "La falta de exportación por centro de costos frenó las 9 oportunidades perdidas",
-        "critical": false,
-        "test": "Enviar un archivo de ejemplo a las 9 y pedir llamada; se refuta si menos de 3 aceptan",
+        "test": "Volver a contactar a las 9 oportunidades con el alcance propuesto y ver cuántas reabren conversación",
         "status": "con-prueba"
       }
     ],
@@ -275,27 +254,20 @@ export const casos: Idea[] = [
       {
         "id": "q1",
         "code": "Q1",
-        "text": "¿El MVP es para la empresa de 40 empleados o para la de 200?",
+        "text": "¿Los dos ERPs más usados por los prospectos grandes son también los de tus clientes de 40 empleados?",
         "critical": true,
         "status": "open"
       },
       {
         "id": "q2",
         "code": "Q2",
-        "text": "¿Qué umbral de oportunidades recuperadas, fijado de antemano, refutaría que la exportación era lo que faltaba?",
+        "text": "¿El MVP es para empresas de 200+ empleados o para el cliente típico de 40?",
         "critical": true,
         "status": "open"
       },
       {
         "id": "q3",
         "code": "Q3",
-        "text": "¿Los dos ERPs más usados por los prospectos grandes son también los de tus clientes de 40 empleados?",
-        "critical": true,
-        "status": "open"
-      },
-      {
-        "id": "q4",
-        "code": "Q4",
         "text": "¿Qué tarea concreta intentan resolver los clientes cuando piden un reporte personalizado?",
         "critical": true,
         "status": "open"
@@ -324,25 +296,19 @@ export const casos: Idea[] = [
         "id": "hl4",
         "text": "Lo que dejas fuera también es parte del spec",
         "mark": "si"
-      },
-      {
-        "id": "hl5",
-        "text": "Usar la función no prueba que resolvía el problema",
-        "mark": "si"
-      },
-      {
-        "id": "hl6",
-        "text": "Prueba la demanda con un archivo, no con un trimestre",
-        "mark": "si"
       }
     ],
     "proposals": [],
     "nextStep": {
-      "text": "Enviar un archivo de ejemplo por centro de costos a las 9 oportunidades perdidas y pedir una llamada; hecho cuando las 9 lo reciban; se refuta si menos de 3 aceptan",
-      "why": "Prueba la demanda con un archivo, no con un trimestre",
-      "doneWhen": "Las 9 oportunidades perdidas recibieron el archivo de ejemplo; se refuta si menos de 3 aceptan la llamada.",
-      "effort": "Esta semana"
+      "text": "Por definir: primero hay que cerrar la pregunta crítica abierta.",
+      "why": "Lo que dejas fuera también es parte del spec",
+      "doneWhen": "Cuando Pilar y tú acuerden una acción concreta para esta semana.",
+      "effort": "Por definir"
     },
+    "tags": [
+      "Industria",
+      "Producto · MVP"
+    ],
     "messages": [
       {
         "id": "m1",
@@ -391,30 +357,6 @@ export const casos: Idea[] = [
         "role": "assistant",
         "at": "2026-10-27T16:14:40-06:00",
         "content": "Ya tienes un MVP propuesto: exportación por centro de costos a CSV y a los dos ERPs más usados, dejando fuera el constructor visual, las gráficas y los envíos programados. Lo descartado también cuenta, porque ahí queda lo que pedía ventas al principio. El punto flojo es que esos \"dos más usados\" salen de prospectos de 200, no de tus clientes de 40. ¿Qué tendría que pasar con esas nueve oportunidades para que concluyas que la exportación no bastaba?"
-      },
-      {
-        "id": "m9",
-        "role": "user",
-        "at": "2026-10-27T16:17:00-06:00",
-        "content": "La métrica de éxito que pensaba es el número de exportaciones por semana."
-      },
-      {
-        "id": "m10",
-        "role": "assistant",
-        "at": "2026-10-27T16:17:40-06:00",
-        "content": "Propones medir el éxito por exportaciones semanales. Esa cifra dice si alguien usa la función, pero no si resolvía el problema: tus clientes de 40 podrían exportar mucho sin que recuperes un solo prospecto de 200. Si la apuesta es ganar esas cuentas, mide **oportunidades que avanzan o se cierran gracias a la exportación**. ¿Qué resultado concreto, escrito desde ya, te haría aceptar que la exportación no bastaba?"
-      },
-      {
-        "id": "m11",
-        "role": "user",
-        "at": "2026-10-27T16:20:00-06:00",
-        "content": "¿Cómo lo pruebo antes de que ingeniería invierta un trimestre?"
-      },
-      {
-        "id": "m12",
-        "role": "assistant",
-        "at": "2026-10-27T16:20:40-06:00",
-        "content": "Antes de construir, puedes probar la demanda a mano. Esta semana, arma un archivo de ejemplo por centro de costos en el formato de su ERP y envíaselo a las nueve oportunidades perdidas, pidiendo una llamada para reabrir la conversación. Queda hecho cuando las nueve lo recibieron, y escribe desde ya que si menos de tres aceptan la llamada, la exportación no era lo que frenaba la venta. ¿Quién de ventas te ayuda a contactarlas?"
       }
     ]
   },
@@ -423,11 +365,11 @@ export const casos: Idea[] = [
     "title": "IA en soporte: piloto con criterio de salida",
     "initialPrompt": "Soy CTO de una startup de logística de última milla, 40 personas. El CEO quiere «meter IA en soporte» porque todos lo están haciendo. A mí me preocupa que un bot invente cosas a los clientes.",
     "thesis": "El CEO quiere meter IA en soporte; empezar por un asistente interno que redacta y un agente revisa, porque si se equivoca lo atrapa una persona.",
-    "summary": "Empezó como «meter IA en soporte porque todos lo hacen». Hoy hay una opción elegida (asistente interno antes que chatbot directo), un riesgo nombrado (agentes que aprueban sin leer) y una hipótesis sobre el tiempo de primera respuesta que necesita línea base y criterios de muerte escritos antes del piloto.",
-    "status": "convergiendo",
-    "stage": "siguiente",
+    "summary": "Empezó como «Soy CTO de una startup de logística de última milla, 40 personas. El CEO quiere «meter IA en soporte» porque t». En curso: Más rápido puede significar mejor o que nadie está leyendo.",
+    "status": "explorando",
+    "stage": "prueba",
     "createdAt": "2026-10-28T09:40:00-06:00",
-    "updatedAt": "2026-10-28T09:55:40-06:00",
+    "updatedAt": "2026-10-28T09:52:40-06:00",
     "decisions": [
       {
         "id": "d1",
@@ -452,7 +394,7 @@ export const casos: Idea[] = [
         "code": "H2",
         "text": "El asistente reduce a la mitad el tiempo de primera respuesta en tickets de rastreo",
         "critical": false,
-        "test": "Comparar contra la línea base durante un piloto de un mes, junto con errores al cliente y tasa de edición",
+        "test": "Comparar el tiempo de primera respuesta antes y después en tickets de rastreo, junto con la tasa de respuestas corregidas o con errores",
         "status": "con-prueba"
       }
     ],
@@ -521,20 +463,19 @@ export const casos: Idea[] = [
         "id": "hl5",
         "text": "Más rápido puede significar mejor o que nadie está leyendo",
         "mark": "si"
-      },
-      {
-        "id": "hl6",
-        "text": "El criterio para matar un piloto se escribe antes de empezar",
-        "mark": "si"
       }
     ],
     "proposals": [],
     "nextStep": {
-      "text": "Medir la línea base de tickets de rastreo y firmar con el CEO tres condiciones de muerte del piloto: el tiempo no baja lo pactado, suben los errores al cliente o casi ningún borrador se edita. Hecho: documento con números. Refutación: los datos no permiten obtener la línea base.",
-      "why": "El criterio para matar un piloto se escribe antes de empezar",
-      "doneWhen": "Existe un documento con la línea base y tres condiciones de muerte firmadas con el CEO; se refuta si los datos no permiten obtener la línea base.",
-      "effort": "Esta semana"
+      "text": "Por definir: primero hay que cerrar la pregunta crítica abierta.",
+      "why": "Más rápido puede significar mejor o que nadie está leyendo",
+      "doneWhen": "Cuando Pilar y tú acuerden una acción concreta para esta semana.",
+      "effort": "Por definir"
     },
+    "tags": [
+      "Industria",
+      "Estrategia técnica · IA"
+    ],
     "messages": [
       {
         "id": "m1",
@@ -595,18 +536,6 @@ export const casos: Idea[] = [
         "role": "assistant",
         "at": "2026-10-28T09:52:40-06:00",
         "content": "Eso es una hipótesis, no un hecho: que el asistente reduzca a la mitad el tiempo de primera respuesta en tickets de rastreo. Ojo con la trampa: un tiempo que baja mucho también puede ser la señal de que aprueban sin leer, así que conviene medirlo junto con los errores que llegan al cliente. Para que se pueda refutar necesitas un punto de partida. **¿Cuánto tarda hoy tu equipo en dar la primera respuesta a esos tickets?**"
-      },
-      {
-        "id": "m11",
-        "role": "user",
-        "at": "2026-10-28T09:55:00-06:00",
-        "content": "¿Cómo armo un piloto de un mes con criterios claros para matarlo si no sirve?"
-      },
-      {
-        "id": "m12",
-        "role": "assistant",
-        "at": "2026-10-28T09:55:40-06:00",
-        "content": "Un piloto se mata sin drama solo si el criterio de muerte se escribe antes. Esta semana: mide la línea base de tickets de rastreo (tiempo de primera respuesta y errores al cliente) y acuerda con tu CEO **tres condiciones para matarlo**: el tiempo no baja lo pactado, suben los errores o casi ningún borrador se edita. Está hecho cuando ese documento existe con números; lo refuta que tus datos no den la línea base. ¿Quién tiene acceso a esos registros?"
       }
     ]
   },
@@ -615,11 +544,11 @@ export const casos: Idea[] = [
     "title": "Entender Bayes para el proyecto final",
     "initialPrompt": "Estoy en sexto semestre de actuaría y no entiendo la estadística bayesiana. Mi profesor dice que es clave para mi proyecto final y siento que todo son fórmulas sin sentido.",
     "thesis": "No entiendo la estadística bayesiana y la necesito para estimar la frecuencia de siniestros en una cartera pequeña de seguros de auto.",
-    "summary": "Empezó como «todo son fórmulas sin sentido». Hoy la duda está acotada (por qué elegir una priori no es trampa), anclada a su propio proyecto con un modelo Poisson-Gamma y convertida en un plan de tres semanas que exige explicarlo sin fórmulas.",
-    "status": "convergiendo",
-    "stage": "siguiente",
+    "summary": "Empezó como «Estoy en sexto semestre de actuaría y no entiendo la estadística bayesiana. Mi profesor dice que es clave para». En curso: Tu cartera es el mejor ejemplo: Poisson con priori Gamma.",
+    "status": "explorando",
+    "stage": "forma",
     "createdAt": "2026-10-26T20:10:00-06:00",
-    "updatedAt": "2026-10-26T20:25:40-06:00",
+    "updatedAt": "2026-10-26T20:19:40-06:00",
     "decisions": [
       {
         "id": "d1",
@@ -636,46 +565,21 @@ export const casos: Idea[] = [
         "reason": "Los ejemplos de monedas no se parecen a su problema",
         "status": "proposed",
         "source": "chat"
-      },
-      {
-        "id": "d3",
-        "code": "D3",
-        "text": "Modelar la frecuencia con Poisson y priori Gamma",
-        "reason": "Encaja con pocos datos y conecta con credibilidad",
-        "status": "proposed",
-        "source": "chat"
-      },
-      {
-        "id": "d4",
-        "code": "D4",
-        "text": "Organizar el avance en tres semanas: cálculo a mano, código verificado, sensibilidad y redacción",
-        "reason": "Entender antes de programar evita copiar código sin sentido",
-        "status": "proposed",
-        "source": "chat"
       }
     ],
-    "hypotheses": [
-      {
-        "id": "h1",
-        "code": "H1",
-        "text": "La priori pesa mucho en la estimación por tener pocos datos",
-        "critical": false,
-        "test": "Comparar posterioris con tres prioris distintas; se refuta si casi no cambian",
-        "status": "con-prueba"
-      }
-    ],
+    "hypotheses": [],
     "questions": [
       {
         "id": "q1",
         "code": "Q1",
-        "text": "¿Qué fuente externa justificará la priori de mercado?",
+        "text": "¿Ya tiene acceso a los datos de su cartera?",
         "critical": true,
         "status": "open"
       },
       {
         "id": "q2",
         "code": "Q2",
-        "text": "¿Ya tiene acceso a los datos de su cartera?",
+        "text": "¿De qué fuente externa saldría la información para la priori?",
         "critical": true,
         "status": "open"
       },
@@ -717,25 +621,19 @@ export const casos: Idea[] = [
         "id": "hl4",
         "text": "Tu cartera es el mejor ejemplo: Poisson con priori Gamma",
         "mark": "si"
-      },
-      {
-        "id": "hl5",
-        "text": "Si no puedes explicar el cambio, sigue siendo fórmula sin historia",
-        "mark": "si"
-      },
-      {
-        "id": "hl6",
-        "text": "Si no puedes explicarlo sin fórmulas, todavía no lo entiendes",
-        "mark": "si"
       }
     ],
     "proposals": [],
     "nextStep": {
-      "text": "Semana 1: calcular a mano o en hoja de cálculo la posteriori Poisson-Gamma con tres prioris; hecho cuando puedas explicar sin fórmulas por qué se movieron",
-      "why": "Si no puedes explicarlo sin fórmulas, todavía no lo entiendes",
-      "doneWhen": "Puedes explicar sin fórmulas por qué se movieron las tres posterioris.",
-      "effort": "6 horas por semana, 3 semanas"
+      "text": "Por definir: primero hay que cerrar la pregunta crítica abierta.",
+      "why": "Tu cartera es el mejor ejemplo: Poisson con priori Gamma",
+      "doneWhen": "Cuando Pilar y tú acuerden una acción concreta para esta semana.",
+      "effort": "Por definir"
     },
+    "tags": [
+      "Académico",
+      "Estudiante · aprender un tema"
+    ],
     "messages": [
       {
         "id": "m1",
@@ -784,30 +682,6 @@ export const casos: Idea[] = [
         "role": "assistant",
         "at": "2026-10-26T20:19:40-06:00",
         "content": "Las monedas no te sirven porque no se parecen a tu problema, y tu problema ya trae su propio ejemplo. La frecuencia de siniestros suele modelarse como **Poisson con priori Gamma**, y ahí la posteriori sale casi a mano: es credibilidad pura. Podemos armarlo con los números de tu cartera, y si encuentras una fuente pública de frecuencias, pégala con \"Agregar fuente\" para construir la priori. ¿Ya tienes acceso a los datos de tu cartera?"
-      },
-      {
-        "id": "m9",
-        "role": "user",
-        "at": "2026-10-26T20:22:00-06:00",
-        "content": "Tengo tres semanas antes de entregar el avance y unas 6 horas a la semana para esto."
-      },
-      {
-        "id": "m10",
-        "role": "assistant",
-        "at": "2026-10-26T20:22:40-06:00",
-        "content": "Dieciocho horas alcanzan si no te pierdes en teoría y vas directo a tu cartera. Esta semana, unas 6 horas: estima la frecuencia con Poisson-Gamma usando tus datos y **tres prioris distintas** (optimista, neutra y la de mercado). Estará hecho cuando tengas una tabla con las tres posterioris; si no puedes explicar en un párrafo por qué se movieron, todavía es fórmula sin historia. ¿Qué cifra externa usarías para la priori de mercado?"
-      },
-      {
-        "id": "m11",
-        "role": "user",
-        "at": "2026-10-26T20:25:00-06:00",
-        "content": "¿Cómo organizo esas tres semanas para llegar entendiendo y no solo copiando código?"
-      },
-      {
-        "id": "m12",
-        "role": "assistant",
-        "at": "2026-10-26T20:25:40-06:00",
-        "content": "Quieres que cada semana te deje una explicación, no solo un script. Primera semana: las tres prioris a mano o en hoja de cálculo, sin código. Segunda: el mismo modelo en código, verificando que coincide con tu cálculo; tercera: sensibilidad y redactar por qué la priori pesa tanto con pocos datos, y **no avanzas si no puedes explicarlo sin fórmulas**. ¿A quién podrías explicárselo al cerrar cada semana?"
       }
     ]
   },
@@ -816,11 +690,11 @@ export const casos: Idea[] = [
     "title": "Delivery y ultraprocesados en universitarios",
     "initialPrompt": "Soy investigadora en salud pública. Quiero estudiar «el impacto de las apps de delivery en la alimentación de los jóvenes», pero mi comité dice que la pregunta es demasiado amplia.",
     "thesis": "Quienes usan delivery más de tres veces por semana consumen más ultraprocesados que quienes no.",
-    "summary": "Empezó como «el impacto de las apps de delivery en la alimentación de los jóvenes», que el comité vio demasiado amplio. Hoy es una pregunta de asociación (no causal) en universitarios de dos universidades de Guadalajara, con diseño transversal y un piloto para probar la parte más frágil de la medición.",
-    "status": "convergiendo",
-    "stage": "siguiente",
+    "summary": "Empezó como «Soy investigadora en salud pública. Quiero estudiar «el impacto de las apps de delivery en la alimentación de ». En curso: Si el delivery ya cuenta como ultraprocesado, mides lo mismo dos veces.",
+    "status": "explorando",
+    "stage": "prueba",
     "createdAt": "2026-10-25T12:30:00-06:00",
-    "updatedAt": "2026-10-25T12:45:40-06:00",
+    "updatedAt": "2026-10-25T12:39:40-06:00",
     "decisions": [
       {
         "id": "d1",
@@ -851,17 +725,9 @@ export const casos: Idea[] = [
       {
         "id": "h1",
         "code": "H1",
-        "text": "Quienes usan delivery más de tres veces por semana consumen más ultraprocesados que quienes no",
+        "text": "Quienes usan delivery más de tres veces por semana consumen más ultraprocesados que quienes no lo usan",
         "critical": false,
-        "test": "Encuesta transversal con cuestionario de frecuencia de consumo en universitarios de dos universidades de Guadalajara",
-        "status": "con-prueba"
-      },
-      {
-        "id": "h2",
-        "code": "H2",
-        "text": "Los estudiantes pueden consultar su historial de delivery y reportar su frecuencia con precisión",
-        "critical": false,
-        "test": "Piloto con 10 estudiantes: frecuencia recordada vs. historial de la app",
+        "test": "Encuesta transversal con cuestionario de frecuencia, comparando ambos grupos y ajustando por confusores",
         "status": "con-prueba"
       }
     ],
@@ -869,41 +735,27 @@ export const casos: Idea[] = [
       {
         "id": "q1",
         "code": "Q1",
-        "text": "¿Qué diferencia entre lo recordado y el historial se considerará inaceptable?",
+        "text": "¿Cómo se separa el consumo de ultraprocesados que llega por delivery del que proviene de otras vías?",
         "critical": true,
         "status": "open"
       },
       {
         "id": "q2",
         "code": "Q2",
-        "text": "¿Cómo se medirá la frecuencia de delivery de forma verificable y no solo por recuerdo?",
+        "text": "¿Qué variables confusoras (ingreso, vivir solo, horarios) hay que medir para que la asociación sea interpretable?",
         "critical": true,
         "status": "open"
       },
       {
         "id": "q3",
         "code": "Q3",
-        "text": "¿Cómo se separa el consumo de ultraprocesados que llega por delivery del que proviene de otras vías?",
+        "text": "¿El estudio busca demostrar causalidad o describir una asociación?",
         "critical": true,
         "status": "open"
       },
       {
         "id": "q4",
         "code": "Q4",
-        "text": "¿Qué variables confusoras (ingreso, vivir solo, horarios) hay que medir para que la asociación sea interpretable?",
-        "critical": true,
-        "status": "open"
-      },
-      {
-        "id": "q5",
-        "code": "Q5",
-        "text": "¿El estudio busca demostrar causalidad o describir una asociación?",
-        "critical": true,
-        "status": "open"
-      },
-      {
-        "id": "q6",
-        "code": "Q6",
         "text": "¿Qué cambio concreto sospechas que las apps de delivery provocan en la alimentación de los jóvenes?",
         "critical": true,
         "status": "open"
@@ -932,25 +784,19 @@ export const casos: Idea[] = [
         "id": "hl4",
         "text": "Si el delivery ya cuenta como ultraprocesado, mides lo mismo dos veces",
         "mark": "si"
-      },
-      {
-        "id": "hl5",
-        "text": "El historial de la app no depende de la memoria",
-        "mark": "si"
-      },
-      {
-        "id": "hl6",
-        "text": "Prueba primero la parte más frágil de tu medición",
-        "mark": "si"
       }
     ],
     "proposals": [],
     "nextStep": {
-      "text": "Aplicar el cuestionario a 10 estudiantes comparando frecuencia recordada con su historial de la app; hecho al tener 10 parejas de datos; se refuta si más de la mitad no accede al historial o hay gran discrepancia.",
-      "why": "Prueba primero la parte más frágil de tu medición",
-      "doneWhen": "Tienes 10 parejas de datos (frecuencia recordada vs. historial de la app); se refuta si más de la mitad no accede a su historial o la diferencia es grande.",
-      "effort": "Esta semana"
+      "text": "Por definir: primero hay que cerrar la pregunta crítica abierta.",
+      "why": "Si el delivery ya cuenta como ultraprocesado, mides lo mismo dos veces",
+      "doneWhen": "Cuando Pilar y tú acuerden una acción concreta para esta semana.",
+      "effort": "Por definir"
     },
+    "tags": [
+      "Académico",
+      "Investigación"
+    ],
     "messages": [
       {
         "id": "m1",
@@ -999,30 +845,6 @@ export const casos: Idea[] = [
         "role": "assistant",
         "at": "2026-10-25T12:39:40-06:00",
         "content": "Una encuesta transversal con cuestionario de frecuencia encaja con tu pregunta de asociación, y un año con asistente da para hacerla bien. Aquí hay algo que no me cuadra: si lo que piden por delivery ya cuenta como ultraprocesado, la asociación sale **casi por definición**, porque estarías midiendo lo mismo dos veces. ¿Tu cuestionario separa lo que llega por app de lo que comen por otras vías?"
-      },
-      {
-        "id": "m9",
-        "role": "user",
-        "at": "2026-10-25T12:42:00-06:00",
-        "content": "Lo que más me preocupa es que la gente no recuerde bien lo que comió ni cuántas veces pidió."
-      },
-      {
-        "id": "m10",
-        "role": "assistant",
-        "at": "2026-10-25T12:42:40-06:00",
-        "content": "Te preocupa el sesgo de memoria, y es razonable con un cuestionario de frecuencia. El matiz es que **los pedidos sí dejan rastro**: el historial de la app es un registro que el propio estudiante puede consultar al responder, así que esa mitad de la medición no depende de recordar. ¿Te parece viable pedirles que revisen su historial de pedidos del último mes durante la encuesta?"
-      },
-      {
-        "id": "m11",
-        "role": "user",
-        "at": "2026-10-25T12:45:00-06:00",
-        "content": "¿Cuál sería mi primer experimento pequeño antes de lanzar la encuesta completa?"
-      },
-      {
-        "id": "m12",
-        "role": "assistant",
-        "at": "2026-10-25T12:45:40-06:00",
-        "content": "Antes de lanzar todo, conviene probar la parte más frágil. Esta semana tu asistente podría aplicar el cuestionario a **10 estudiantes**, pidiéndoles primero su frecuencia de pedidos de memoria y luego revisando el historial de la app; está hecho cuando tengas las 10 parejas de datos. Si más de la mitad no puede acceder a su historial o lo recordado difiere mucho de lo registrado, tu diseño necesita ajuste. ¿Qué diferencia considerarías \"demasiada\" antes de verlo?"
       }
     ]
   },
@@ -1031,11 +853,11 @@ export const casos: Idea[] = [
     "title": "Tema de tesis: LLMs y retroalimentación",
     "initialPrompt": "Estudio una maestría en ciencias de la computación y tengo que definir tema de tesis. Me interesa «IA para la educación», pero mi asesor dice que eso no es un tema, es un área.",
     "thesis": "Retroalimentación con modelos de lenguaje para estudiantes de bachillerato técnico que aprenden a programar en español.",
-    "summary": "Empezó como «IA para la educación», que el asesor llamó un área y no un tema. Hoy hay un hueco concreto en la literatura, un contexto candidato (unos 60 alumnos de un CBTIS en Puebla) y una restricción real: 14 meses y un artículo enviado. Falta saber por qué el contexto cambiaría el resultado.",
-    "status": "convergiendo",
-    "stage": "siguiente",
+    "summary": "Empezó como «Estudio una maestría en ciencias de la computación y tengo que definir tema de tesis. Me interesa «IA para la ». En curso: El acceso dice dónde; falta decir por qué importaría.",
+    "status": "explorando",
+    "stage": "forma",
     "createdAt": "2026-10-24T18:00:00-06:00",
-    "updatedAt": "2026-10-24T18:15:40-06:00",
+    "updatedAt": "2026-10-24T18:09:40-06:00",
     "decisions": [
       {
         "id": "d1",
@@ -1060,65 +882,34 @@ export const casos: Idea[] = [
         "reason": "Acceso viable a través de un amigo que da clases ahí",
         "status": "proposed",
         "source": "chat"
-      },
-      {
-        "id": "d4",
-        "code": "D4",
-        "text": "Diseñar la tesis hacia atrás desde 14 meses y un artículo enviado",
-        "reason": "Es la restricción real de titulación",
-        "status": "proposed",
-        "source": "chat"
       }
     ],
-    "hypotheses": [
-      {
-        "id": "h1",
-        "code": "H1",
-        "text": "El CBTIS permitirá recoger datos dentro de los primeros ocho meses",
-        "critical": false,
-        "test": "Confirmar por escrito el calendario del semestre y la ruta de permisos esta semana",
-        "status": "con-prueba"
-      }
-    ],
+    "hypotheses": [],
     "questions": [
       {
         "id": "q1",
         "code": "Q1",
-        "text": "¿Quién autoriza en el plantel una investigación con alumnos menores de edad?",
+        "text": "¿Qué diferencia de estos estudiantes haría esperar resultados distintos a los de los papers en inglés?",
         "critical": true,
         "status": "open"
       },
       {
         "id": "q2",
         "code": "Q2",
-        "text": "¿Cuándo empieza el próximo semestre en que los alumnos del CBTIS llevan programación?",
+        "text": "¿Por qué esperarías que los resultados sean distintos en bachilleratos técnicos en español?",
         "critical": true,
         "status": "open"
       },
       {
         "id": "q3",
         "code": "Q3",
-        "text": "¿Qué diferencia de estos estudiantes haría esperar resultados distintos a los de los papers en inglés?",
+        "text": "¿Qué miden los trabajos existentes y qué dejan sin medir?",
         "critical": true,
         "status": "open"
       },
       {
         "id": "q4",
         "code": "Q4",
-        "text": "¿Por qué esperarías que los resultados sean distintos en bachilleratos técnicos en español?",
-        "critical": true,
-        "status": "open"
-      },
-      {
-        "id": "q5",
-        "code": "Q5",
-        "text": "¿Qué miden los trabajos existentes y qué dejan sin medir?",
-        "critical": true,
-        "status": "open"
-      },
-      {
-        "id": "q6",
-        "code": "Q6",
         "text": "¿Qué situación concreta de aprendizaje está mal resuelta y quieres atacar?",
         "critical": true,
         "status": "open"
@@ -1147,25 +938,19 @@ export const casos: Idea[] = [
         "id": "hl4",
         "text": "El acceso dice dónde; falta decir por qué importaría",
         "mark": "si"
-      },
-      {
-        "id": "hl5",
-        "text": "Tu calendario lo dicta el semestre escolar, no la maestría",
-        "mark": "si"
-      },
-      {
-        "id": "hl6",
-        "text": "Primero confirma la ventana de datos; sin ella no hay tesis",
-        "mark": "si"
       }
     ],
     "proposals": [],
     "nextStep": {
-      "text": "Reunirte con tu amigo y la dirección del CBTIS para confirmar por escrito la fecha del próximo semestre de programación y el proceso de permisos y consentimiento de padres",
-      "why": "Primero confirma la ventana de datos; sin ella no hay tesis",
-      "doneWhen": "Tienes por escrito la fecha del próximo semestre de programación y el camino de permisos; si no hay ventana antes del mes ocho, el diseño no es viable así.",
-      "effort": "Este mes"
+      "text": "Por definir: primero hay que cerrar la pregunta crítica abierta.",
+      "why": "El acceso dice dónde; falta decir por qué importaría",
+      "doneWhen": "Cuando Pilar y tú acuerden una acción concreta para esta semana.",
+      "effort": "Por definir"
     },
+    "tags": [
+      "Académico",
+      "Tesis de maestría"
+    ],
     "messages": [
       {
         "id": "m1",
@@ -1214,30 +999,6 @@ export const casos: Idea[] = [
         "role": "assistant",
         "at": "2026-10-24T18:09:40-06:00",
         "content": "Tener acceso a 60 alumnos de un CBTIS en Puebla resuelve el **dónde**, y eso no es poca cosa en una tesis. Pero el acceso responde a si puedes hacerlo, no a por qué importaría: sigues necesitando una razón para esperar resultados distintos. Si conoces el grupo por tu amigo, tal vez ya intuyes algo. ¿Qué tienen esos alumnos que podría hacer que la retroalimentación funcione distinto con ellos?"
-      },
-      {
-        "id": "m9",
-        "role": "user",
-        "at": "2026-10-24T18:12:00-06:00",
-        "content": "Me quedan 14 meses para titularme y necesito al menos un artículo enviado."
-      },
-      {
-        "id": "m10",
-        "role": "assistant",
-        "at": "2026-10-24T18:12:40-06:00",
-        "content": "Catorce meses y un artículo enviado son tu restricción real, y conviene diseñar hacia atrás desde ella. El reloj que manda probablemente no sea el tuyo sino el del CBTIS: con 60 alumnos, quizá tengas una sola ventana de semestre para recoger datos, y si se te pasa, no hay segunda vuelta. **Tu calendario lo dicta el semestre escolar, no la maestría.** ¿Cuándo empieza el próximo periodo en que esos alumnos llevan programación?"
-      },
-      {
-        "id": "m11",
-        "role": "user",
-        "at": "2026-10-24T18:15:00-06:00",
-        "content": "¿Qué hago este mes para saber si este tema es viable?"
-      },
-      {
-        "id": "m12",
-        "role": "assistant",
-        "at": "2026-10-24T18:15:40-06:00",
-        "content": "Lo que necesitas este mes no es más lectura, sino saber si el CBTIS te abre una ventana real. Esta semana, reúnete con tu amigo y, si se puede, con la dirección, para conseguir por escrito la fecha del próximo semestre de programación y el camino de permisos, incluido el consentimiento de padres, porque son menores. **Hecho** es tener esas dos cosas confirmadas; si no hay ventana antes del mes ocho o los permisos se ven imposibles, este diseño no es viable tal como está. ¿Quién autoriza en ese plantel una investigación con alumnos?"
       }
     ]
   },
@@ -1246,11 +1007,11 @@ export const casos: Idea[] = [
     "title": "Mole casero en frascos",
     "initialPrompt": "hago un mole muy bueno y quiero venderlo de alguna manera",
     "thesis": "Hago un mole muy bueno y quiero venderlo. Me inclino por frascos porque dura más y no tengo que estar en un puesto.",
-    "summary": "Empezó como «venderlo de alguna manera» con unos 30 mil ahorrados. Hoy hay un formato propuesto (frascos), pero la única evidencia viene de familia y vecinos y todavía no se conoce el costo por frasco.",
-    "status": "convergiendo",
-    "stage": "siguiente",
+    "summary": "Empezó como «hago un mole muy bueno y quiero venderlo de alguna manera». En curso: Elige el formato pensando en quien compra, no solo en ti.",
+    "status": "explorando",
+    "stage": "prueba",
     "createdAt": "2026-10-28T16:05:00-06:00",
-    "updatedAt": "2026-10-28T16:23:40-06:00",
+    "updatedAt": "2026-10-28T16:17:40-06:00",
     "decisions": [
       {
         "id": "d1",
@@ -1307,42 +1068,42 @@ export const casos: Idea[] = [
       {
         "id": "q1",
         "code": "Q1",
-        "text": "¿Cuánto cuesta producir un frasco de mole?",
-        "critical": true,
+        "text": "¿Algún vecino o conocido ha pagado alguna vez por tu mole?",
+        "critical": false,
         "status": "open"
       },
       {
         "id": "q2",
         "code": "Q2",
-        "text": "¿Cuántos frascos tendrían que venderse a desconocidos, y en cuántos días, para seguir adelante?",
+        "text": "¿Cuántos frascos vendidos a desconocidos, y en qué plazo, te harían seguir o abandonar esta forma de vender?",
         "critical": true,
         "status": "open"
       },
       {
         "id": "q3",
         "code": "Q3",
-        "text": "¿Algún vecino o conocido ha pagado alguna vez por tu mole?",
-        "critical": false,
+        "text": "¿Alguien fuera de familia y vecinos ha pagado o pedido mole por iniciativa propia?",
+        "critical": true,
         "status": "open"
       },
       {
         "id": "q4",
         "code": "Q4",
-        "text": "¿Cuántos frascos vendidos a desconocidos, y en qué plazo, te harían seguir o abandonar esta forma de vender?",
+        "text": "¿Alguien fuera de familia y amigos ha probado el mole y ha querido pagar por él?",
         "critical": true,
         "status": "open"
       },
       {
         "id": "q5",
         "code": "Q5",
-        "text": "¿Alguien fuera de familia y vecinos ha pagado o pedido mole por iniciativa propia?",
+        "text": "¿Quién es el primer comprador concreto del mole y para qué ocasión lo quiere?",
         "critical": true,
         "status": "open"
       },
       {
         "id": "q6",
         "code": "Q6",
-        "text": "¿Alguien fuera de familia y amigos ha probado el mole y ha querido pagar por él?",
+        "text": "¿Para quién sería este mole y qué cambiaría para esa persona?",
         "critical": true,
         "status": "open"
       }
@@ -1375,25 +1136,19 @@ export const casos: Idea[] = [
         "id": "hl5",
         "text": "Elige el formato pensando en quien compra, no solo en ti",
         "mark": "si"
-      },
-      {
-        "id": "hl6",
-        "text": "Sin costo por frasco no sabes si vender te deja o te quita",
-        "mark": "si"
-      },
-      {
-        "id": "hl7",
-        "text": "Primero el costo; luego el criterio; después vender a desconocidos",
-        "mark": "si"
       }
     ],
     "proposals": [],
     "nextStep": {
-      "text": "Preparar una tanda pequeña anotando todos los gastos (ingredientes, frascos, tapas, etiquetas, gas) y calcular el costo por frasco; hecho cuando el número y la lista estén escritos",
-      "why": "Primero el costo; luego el criterio; después vender a desconocidos",
-      "doneWhen": "Tienes escrita la lista de gastos de la tanda y el costo por frasco que resulta.",
-      "effort": "Una tanda, esta semana"
+      "text": "Por definir: primero hay que cerrar la pregunta crítica abierta.",
+      "why": "Elige el formato pensando en quien compra, no solo en ti",
+      "doneWhen": "Cuando Pilar y tú acuerden una acción concreta para esta semana.",
+      "effort": "Por definir"
     },
+    "tags": [
+      "Cotidiano",
+      "Emprendimiento"
+    ],
     "messages": [
       {
         "id": "m1",
@@ -1454,30 +1209,6 @@ export const casos: Idea[] = [
         "role": "assistant",
         "at": "2026-10-28T16:17:40-06:00",
         "content": "Elegiste frascos porque duran más y no te atan a un puesto; lo anoto como **decisión propuesta**, y es razonable que tu tiempo cuente. Pero son razones de comodidad tuya, no de quien compra, y el frasco trae sus propios supuestos: que quien no te conoce pague por un mole envasado sin probarlo antes y que puedas conservarlo de forma segura el tiempo que crees, algo que conviene confirmar antes de invertir en envases o permisos. Una prueba pequeña sería preparar unos 10 frascos con tu receta actual y ofrecerlos solo a personas fuera de familia y vecinos, gastando una parte mínima de tus 30 mil. Antes de hacerlo, ¿cuántos de esos 10 frascos tendrían que venderse a desconocidos, y en cuánto tiempo, para que sigas adelante con esta forma de vender?"
-      },
-      {
-        "id": "m11",
-        "role": "user",
-        "at": "2026-10-28T16:20:00-06:00",
-        "content": "no sé cuánto costaría hacer un frasco"
-      },
-      {
-        "id": "m12",
-        "role": "assistant",
-        "at": "2026-10-28T16:20:40-06:00",
-        "content": "No sabes todavía cuánto te cuesta un frasco, y eso es importante: sin ese número no puedes saber a qué precio vender ni si cada venta te deja algo o te quita. La buena noticia es que no hace falta adivinarlo, se puede medir con tu siguiente tanda. Anota todo lo que compras para hacerla (ingredientes, frascos, tapas, etiquetas y una estimación del gas), cuenta cuántos frascos te salen y divide; ese será tu costo por frasco. **Estará hecho** cuando tengas escrito ese número y la lista que lo explica. ¿Cuándo podrías preparar esa tanda para medirlo?"
-      },
-      {
-        "id": "m13",
-        "role": "user",
-        "at": "2026-10-28T16:23:00-06:00",
-        "content": "¿qué hago primero?"
-      },
-      {
-        "id": "m14",
-        "role": "assistant",
-        "at": "2026-10-28T16:23:40-06:00",
-        "content": "Quieres un orden claro, y tiene sentido: hay varias piezas sueltas y no todas van al mismo tiempo. Lo primero es **medir tu costo por frasco** con una tanda pequeña, porque sin ese número no puedes poner precio ni saber si vender te deja dinero. Justo después, y antes de ofrecerlo, escribe cuántos frascos tendrías que vender a desconocidos y en cuántos días para seguir adelante; luego sales a venderlos fuera de familia y vecinos. Esta semana estará hecho cuando tengas escrita la lista de gastos de la tanda y el costo por frasco que resulta. ¿Qué día de esta semana puedes cocinar esa tanda?"
       }
     ]
   }

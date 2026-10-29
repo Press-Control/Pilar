@@ -13,6 +13,7 @@ export type ConversationItem = {
   snippet: string;
   date: string | null;
   turns: number;
+  tags?: string[];
 };
 
 function snippetOf(text: string, max = 120): string {
@@ -45,6 +46,7 @@ export function useConversations(): ConversationItem[] {
         snippet: last ? snippetOf(last.content) : i.initialPrompt,
         date: i.updatedAt,
         turns: i.messages.filter((m) => m.role === "user").length,
+        tags: i.tags,
       };
     });
   const [items, setItems] = useState<ConversationItem[]>(fromFixtures);
@@ -98,6 +100,13 @@ export function ConversationCards({ items, currentId, onNavigate }: { items: Con
                 </span>
               </span>
               <strong>{it.title}</strong>
+              {it.tags?.length ? (
+                <span className="convo-tags">
+                  {it.tags.map((t) => (
+                    <span key={t}>{t}</span>
+                  ))}
+                </span>
+              ) : null}
               {it.snippet ? <p>{it.snippet}</p> : null}
               <span className="convo-card__go">{current ? "Abierta ahora" : "Continuar ↗"}</span>
             </Link>
@@ -154,5 +163,26 @@ export function ConversationsDrawer({ open, onClose, onNew, currentId }: { open:
         <ConversationCards items={items} currentId={currentId} onNavigate={onClose} />
       </aside>
     </>
+  );
+}
+
+/** Always-visible shortcut to the preloaded real cases, for presenting them (left column of /chat). */
+export function CaseLinks({ currentId }: { currentId?: string }) {
+  const cases = ideas.filter((i) => i.tags?.length);
+  if (!cases.length) return null;
+  return (
+    <div className="case-links">
+      <div className="eyebrow journey-label">CASOS REALES</div>
+      <ul>
+        {cases.map((i) => (
+          <li key={i.id}>
+            <Link href={`/chat?idea=${i.id}`} className={i.id === currentId ? "is-current" : undefined} aria-current={i.id === currentId ? "page" : undefined}>
+              <span className="case-links__tag">{i.tags!.join(" · ")}</span>
+              <span className="case-links__title">{i.title}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

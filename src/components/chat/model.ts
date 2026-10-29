@@ -60,9 +60,11 @@ export function initialSnapshot(ideaId?: string | null): ChatSnapshot {
   const idea = getIdea(ideaId);
   if (!idea) return { messages: [], state: emptyState(), engine: null };
   const blockers = readiness(idea).blockers;
+  // Real-case fixtures were recorded against the live engine, so their replies keep the "en vivo" label.
+  const engine = idea.tags?.length ? "anthropic" : null;
   return {
-    engine: null,
-    messages: idea.messages.map((m) => ({ id: m.id, role: m.role, content: m.content, status: "done" as const })),
+    engine,
+    messages: idea.messages.map((m) => ({ id: m.id, role: m.role, content: m.content, status: "done" as const, ...(engine && m.role === "assistant" ? { engine } : {}) })),
     state: {
       title: idea.title,
       concept: idea.thesis,

@@ -129,5 +129,6 @@ export type Idea = {
   proposals: Proposal[];
   nextStep: NextStep;
   messages: FixtureMessage[];
+  tags?: string[]; // context chips for presenting a case ("Industria · Arquitectura")
   exploration?: DecisionExploration;
 };
