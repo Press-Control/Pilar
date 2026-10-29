@@ -4,9 +4,9 @@ import { getIdea } from "@/lib/fixtures";
 
 export const metadata: Metadata = { title: "Cuaderno · El Pilar" };
 
-// Entry points: /chat?q=<primer mensaje> (from Inicio), /chat?idea=<fixture id> (from Tus ideas), ?modo=voz (voice mode).
-export default async function ChatPage({ searchParams }: { searchParams: Promise<{ q?: string; idea?: string; modo?: string }> }) {
-  const { q, idea, modo } = await searchParams;
+// Entry points: /chat?q=<primer mensaje> (from Inicio), /chat?idea=<fixture id> (from Tus ideas), ?modo=voz (voice mode), ?lista (opens the Conversaciones drawer).
+export default async function ChatPage({ searchParams }: { searchParams: Promise<{ q?: string; idea?: string; modo?: string; lista?: string }> }) {
+  const { q, idea, modo, lista } = await searchParams;
   const ideaId = getIdea(idea) ? idea : undefined;
-  return <ChatView key={ideaId ?? "nueva"} ideaId={ideaId} firstPrompt={typeof q === "string" ? q : undefined} initialMode={modo === "voz" ? "voz" : "texto"} />;
+  return <ChatView key={ideaId ?? "nueva"} ideaId={ideaId} firstPrompt={typeof q === "string" ? q : undefined} initialMode={modo === "voz" ? "voz" : "texto"} openList={lista !== undefined} />;
 }

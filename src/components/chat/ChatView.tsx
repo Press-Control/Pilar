@@ -7,7 +7,8 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { GuideMark, PromptComposer } from "@/components/ui";
 import { useToast } from "@/components/shell/preferences";
 import { streamChat } from "@/lib/chat-types";
-import { DEMO_SCRIPT, HOME_PROMPTS, JOURNEY_STAGES, ideas as fixtureIdeas } from "@/lib/fixtures";
+import { DEMO_SCRIPT, HOME_PROMPTS, JOURNEY_STAGES } from "@/lib/fixtures";
+import { ConversationCards, ConversationsDrawer, useConversations } from "./ConversationList";
 import { InsightPanel } from "./InsightPanel";
 import { ListenButton } from "./ListenButton";
 import { VoicePanel } from "./VoicePanel";
@@ -60,7 +61,7 @@ function plainExcerpt(md: string, max = 280): string {
   return text.length > max ? `${text.slice(0, max).replace(/\s\S*$/, "")}…` : text;
 }
 
-export function ChatView({ ideaId, firstPrompt, initialMode = "texto" }: { ideaId?: string; firstPrompt?: string; initialMode?: "texto" | "voz" }) {
+export function ChatView({ ideaId, firstPrompt, initialMode = "texto", openList = false }: { ideaId?: string; firstPrompt?: string; initialMode?: "texto" | "voz"; openList?: boolean }) {
   const router = useRouter();
   const notify = useToast();
   const storeKey = `${STORAGE_PREFIX}${ideaId ?? "nueva"}`;
@@ -76,6 +77,8 @@ export function ChatView({ ideaId, firstPrompt, initialMode = "texto" }: { ideaI
   const [caption, setCaption] = useState<string | null>(null);
   const [entering, setEntering] = useState(!!firstPrompt);
   const [mode, setModeState] = useState<"texto" | "voz">(initialMode);
+  const [convoOpen, setConvoOpen] = useState(openList);
+  const closeConvos = useCallback(() => setConvoOpen(false), []);
   const modeRef = useRef(mode);
   modeRef.current = mode;
 
@@ -375,7 +378,10 @@ export function ChatView({ ideaId, firstPrompt, initialMode = "texto" }: { ideaI
     <section className={`conversation${entering ? " entering" : ""}`} id="conversation" aria-label="Espacio de conversación">
       <nav className="journey" aria-label="El recorrido de tu idea">
         <button type="button" className="new-conversation" onClick={newIdea}>
-          ＋ <span>Nueva idea</span>
+          ＋ <span>Nueva conversación</span>
+        </button>
+        <button type="button" className="convo-open" onClick={() => setConvoOpen(true)}>
+          <span aria-hidden="true">☰</span> Conversaciones
         </button>
         <div className="eyebrow journey-label">TU RECORRIDO</div>
         <ol className="journey-steps">
@@ -413,6 +419,9 @@ export function ChatView({ ideaId, firstPrompt, initialMode = "texto" }: { ideaI
             <p>La conversación avanza. Tu idea toma forma.</p>
           </div>
           <div className="heading-actions">
+            <button type="button" className="convo-toggle" onClick={() => setConvoOpen(true)} aria-label="Ver conversaciones">
+              <span aria-hidden="true">☰</span> <span>Conversaciones</span>
+            </button>
             <div className="mode-toggle" role="group" aria-label="Modo de conversación">
               <button type="button" aria-pressed={mode === "texto"} onClick={() => setMode("texto")}>
                 Texto
@@ -563,6 +572,7 @@ export function ChatView({ ideaId, firstPrompt, initialMode = "texto" }: { ideaI
           <span className="caption-index">{String(users).padStart(2, "0")}</span>
         </div>
       </div>
+      <ConversationsDrawer open={convoOpen} onClose={closeConvos} onNew={newIdea} currentId={ideaId ?? "nueva"} />
     </section>
   );
 }
@@ -583,6 +593,7 @@ function renderInline(text: string): ReactNode[] {
 }
 
 function EmptyChat({ onPick }: { onPick: (text: string, sendNow: boolean) => void }) {
+  const convos = useConversations();
   return (
     <div className="chat-empty">
       <div className="message message-guide arriving">
@@ -595,7 +606,11 @@ function EmptyChat({ onPick }: { onPick: (text: string, sendNow: boolean) => voi
         </div>
       </div>
       <div className="chat-empty__group">
-        <div className="eyebrow">PARA EMPEZAR</div>
+        <div className="eyebrow">CONTINÚA UNA CONVERSACIÓN</div>
+        <ConversationCards items={convos.filter((c) => c.id !== "nueva")} />
+      </div>
+      <div className="chat-empty__group">
+        <div className="eyebrow">O EMPIEZA UNA NUEVA</div>
         <div className="prompts chat-starters">
           {HOME_PROMPTS.map((p) => (
             <button key={p.label} type="button" onClick={() => onPick(p.prefix, false)}>
@@ -606,17 +621,6 @@ function EmptyChat({ onPick }: { onPick: (text: string, sendNow: boolean) => voi
         <button type="button" className="chat-example" onClick={() => onPick(DEMO_SCRIPT[0]!, true)}>
           <span aria-hidden="true">↳</span> «{DEMO_SCRIPT[0]}»
         </button>
-      </div>
-      <div className="chat-empty__group">
-        <div className="eyebrow">O RETOMA UNA IDEA</div>
-        <div className="chat-resume">
-          {fixtureIdeas.map((i) => (
-            <Link key={i.id} href={`/chat?idea=${i.id}`} className="chat-resume__item">
-              <strong>{i.title}</strong>
-              <small>{JOURNEY_STAGES.find((s) => s.id === i.stage)?.title}</small>
-            </Link>
-          ))}
-        </div>
       </div>
     </div>
   );

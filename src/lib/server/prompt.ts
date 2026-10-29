@@ -1,4 +1,5 @@
 import { getIdea, getStage } from "@/lib/fixtures";
+import { CASO_IDS } from "@/lib/fixtures-casos";
 import { UPDATES_MARKER } from "@/lib/chat-types";
 
 /**
@@ -67,6 +68,19 @@ ${UPDATES_MARKER}{"hypotheses":[{"text":"Las vendedoras no crecen por falta de c
 export function ideaContext(ideaId?: string): string {
   const idea = getIdea(ideaId);
   if (!idea) return "";
+  if (CASO_IDS.has(idea.id)) {
+    // Recorded cases: the whole conversation already travels in `messages`, so keep this short.
+    const decs = idea.decisions.filter((d) => d.status !== "reverted");
+    return [
+      `## Idea en curso: ${idea.title}`,
+      "El historial completo de esta conversación va en los mensajes: continúa desde el último turno, sin repetir lo ya dicho.",
+      `Etapa actual: ${idea.stage} (${getStage(idea.stage).title}).`,
+      decs.length ? "Decisiones propuestas (sin confirmar):\n" + decs.map((d) => `- ${d.code}: ${d.text}`).join("\n") : "",
+      `Siguiente paso propuesto: ${idea.nextStep.text}`,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+  }
   const lines: string[] = [];
   lines.push(`## Idea en curso: ${idea.title}`);
   lines.push(`Punto de partida: ${idea.initialPrompt}`);
