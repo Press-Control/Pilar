@@ -91,6 +91,37 @@
   display: flex; gap: 8px;
 }
 .chat-example:hover { opacity: 1; color: var(--ink); border-color: #aaa; }
+/* Conversaciones: list in the empty state and in the "Tu cuaderno" drawer */
+.convo-open {
+  margin-top: 8px; border: 1px solid var(--line); border-radius: 9px; text-align: left; font-size: 11px;
+  padding: 10px 11px; background: transparent; display: flex; gap: 9px; align-items: center; color: var(--muted);
+}
+.convo-open:hover { color: var(--ink); border-color: #aaa; opacity: 1; }
+.convo-toggle {
+  display: flex; align-items: center; gap: 6px; font-size: 9px; color: var(--ink);
+  padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--chat-surface); white-space: nowrap;
+}
+.convo-toggle:hover { border-color: #aaa; opacity: 1; }
+.convo-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+.convo-panel .convo-list { grid-template-columns: 1fr; gap: 10px; }
+.convo-card {
+  display: flex; flex-direction: column; gap: 6px; height: 100%;
+  padding: 13px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface);
+  font-size: 12px; color: var(--ink); transition: border-color var(--motion, 250ms);
+}
+.convo-card:hover { border-color: #aaa; }
+.convo-card.is-current { border-color: var(--ink); }
+.convo-card strong { font-weight: 500; font-size: 13px; line-height: 1.35; }
+.convo-card p {
+  margin: 0; font-size: 11px; line-height: 1.6; color: var(--muted);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.convo-card__meta { display: flex; justify-content: space-between; gap: 8px; font: 9px var(--font-mono, monospace); color: var(--faint); letter-spacing: .3px; }
+.convo-card__go { margin-top: auto; padding-top: 2px; font-size: 10px; text-decoration: underline; text-underline-offset: 3px; color: var(--ink); }
+.convo-card.is-current .convo-card__go { text-decoration: none; color: var(--faint); }
+.convo-new { margin: 0 0 4px; }
+.dark .convo-card { background: #262626; }
+
 .chat-resume { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
 .chat-resume__item {
   display: flex; flex-direction: column; gap: 5px;
@@ -158,6 +189,10 @@
 @media (max-width: 640px) {
   .chat-empty { gap: 18px; }
   .chat-resume { grid-template-columns: 1fr; }
+  .convo-list { grid-template-columns: 1fr; }
+  .convo-toggle { font-size: 8px; padding: 6px 7px; }
+  .convo-toggle span + span { display: none; }
+  .heading-actions { flex-wrap: wrap; justify-content: flex-end; }
   .chat-stop { right: 56px; bottom: 9px; }
   .chat-list { padding: 8px 12px 10px; gap: 8px; }
   .chat-list__item p { font-size: 8px; }

@@ -5,6 +5,7 @@
  * Shared file: owned by the scaffold; other agents may APPEND data/helpers, not rewrite existing ones.
  */
 import type { Idea, IdeaStatus, JourneyStage, JourneyStageId } from "./types";
+import { casos } from "./fixtures-casos";
 
 export const BRAND = {
   name: "El Pilar",
@@ -41,7 +42,7 @@ export const DEMO_SCRIPT = [
   "¿Qué debería hacer esta semana?",
 ];
 
-export const ideas: Idea[] = [
+const baseIdeas: Idea[] = [
   {
     id: "cocina-barrio",
     title: "Cocina compartida del barrio",
@@ -293,6 +294,9 @@ export const ideas: Idea[] = [
     ],
   },
 ];
+
+/** Base fixtures first (cocina-barrio stays first), then the real recorded cases (src/lib/fixtures-casos.ts). */
+export const ideas: Idea[] = [...baseIdeas, ...casos];
 
 export function getIdea(id: string | undefined | null): Idea | undefined {
   return ideas.find((i) => i.id === id);
